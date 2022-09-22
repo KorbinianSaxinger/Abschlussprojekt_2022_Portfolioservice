@@ -1,4 +1,4 @@
-# abschlusspruefung_korbinian_saxinger
+# abschluss_projekt
 
 ## Project setup
 ```
