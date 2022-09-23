@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-data-table
-
+      :headers="headers"
     ></v-data-table>
     <v-row class="text-center">
       <v-col cols="12">
@@ -99,6 +99,15 @@
     name: 'HelloWorld',
 
     data: () => ({
+      headers: [
+        {
+          text: 'Dessert (100g serving)',
+          align: 'start',
+          sortable: false,
+          value: 'name',
+        },
+        {text: 'Döner', value: 'doener'}
+      ],
       ecosystem: [
         {
           text: 'vuetify-loader',
