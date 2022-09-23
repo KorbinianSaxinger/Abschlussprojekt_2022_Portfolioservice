@@ -1,22 +1,25 @@
 <template>
-  <v-app>
-    <v-main>
-      <dashboard/>
-    </v-main>
-  </v-app>
+  <div id="app">
+    <app-header/>
+    <router-view/>
+    <app-footer/>
+  </div>
 </template>
 
+<style lang="scss">
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+</style>
 <script>
-import dashboard from "@/components/dashboard";
+import AppFooter from "@/components/footer";
+import AppHeader from "@/components/header";
 export default {
-  name: 'App',
-
-  components: {
-    dashboard,
-  },
-
-  data: () => ({
-    //
-  }),
-};
+  components: {AppHeader, AppFooter}
+}
 </script>

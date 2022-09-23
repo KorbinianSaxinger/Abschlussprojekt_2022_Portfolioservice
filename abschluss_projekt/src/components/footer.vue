@@ -8,6 +8,7 @@
                 justify="center"
                 no-gutters
             >
+              <div class="links d-flex">
                 <v-btn
                     v-for="link in links"
                     :key="link"
@@ -15,10 +16,12 @@
                     text
                     rounded
                     class="my-2"
-                    @click="redirect(link)"
                 >
-                  {{ link }}
+                  <router-link :to="link">
+                    {{ link }}
+                  </router-link>
                 </v-btn>
+              </div>
                 <v-col
                     class="py-4 text-center black--text"
                     cols="12"
@@ -31,15 +34,16 @@
 </template>
 
 <script>
-  export default {
+export default {
     name: 'app-footer',
 
     data: () => ({
+
         url: '',
         links: [
             'Home',
-            'About Us',
-            'Impressum'
+            'About',
+            'Contact'
         ]
     }),
     methods: {
@@ -53,4 +57,8 @@
 </script>
 
 <style scoped>
+.links {
+  margin-left: 42.4%;
+  justify-content: end;
+}
 </style>
