@@ -1,5 +1,7 @@
 <template>
-  <div class="header d-flex">
+  <div
+      class="header d-flex"
+  >
       <v-img
           class="logo align-left"
           max-height="100"
