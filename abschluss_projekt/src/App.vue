@@ -1,18 +1,18 @@
 <template>
   <v-app>
     <v-main>
-      <dashboard/>
+      <SideBar/>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import dashboard from "@/components/dashboard";
+import SideBar from "@/components/sidebar/sidebar";
 export default {
   name: 'App',
 
   components: {
-    dashboard,
+    SideBar,
   },
 
   data: () => ({

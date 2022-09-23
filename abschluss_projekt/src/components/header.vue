@@ -9,13 +9,17 @@
           src="../assets/logo.png"
       ></v-img>
           <p class="text-md-center">Portfolio Service Korbinian Saxinger</p>
+      <div class="d-flex">
+      </div>
+    <app-menue class="menue"/>
   </div>
 </template>
 
 <script>
+  import AppMenue from "@/components/menue";
   export default {
     name: 'app-header',
-
+    components: {AppMenue},
     data: () => ({
 
     }),
@@ -31,12 +35,17 @@
 
 p {
   position: inherit;
-  margin-left: 37%;
+  margin-left: 36%;
   margin-top: 50px;
   color: black;
 }
 
 .logo {
   margin: 10px 10px 10px 10px;
+}
+
+.menue {
+    margin: 20px 0px 0px 38% ;
+
 }
 </style>
