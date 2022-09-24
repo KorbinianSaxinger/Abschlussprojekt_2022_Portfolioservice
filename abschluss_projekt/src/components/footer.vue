@@ -43,15 +43,13 @@ export default {
         links: [
             'Home',
             'About',
-            'Contact'
+            'Contact',
+            'Login',
+            'Register',
+            '/',
         ]
     }),
     methods: {
-        redirect(link) {
-          let url;
-          url = 'http://localhost:8080/' + link
-          window.location.href = url;
-        }
     }
   }
 </script>
