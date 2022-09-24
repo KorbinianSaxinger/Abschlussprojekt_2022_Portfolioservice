@@ -1,29 +1,46 @@
 <template>
   <div>
-    <form>
-      <label for="iEmail">Email</label>
-      <input
-          type="text"
-          id="iEmail"
-          placeholder=" Email"
-          v-model="email"
-      />
-      <label for="iPasswort">Passwort</label>
-      <input
-          type="text"
-          id="iPasswort"
-          placeholder=" Passwort"
-          v-model="passwort"
-      />
-      <input type="submit" value="Registrierung" @click.prevent="register"/>
-    </form>
-    <p>{{ user }}</p>
+    <v-card
+        class="card d-inline-flex"
+        rounded
+        width="400px"
+        height="400px"
+    >
+      <v-card-title
+          class="title"
+      >Register</v-card-title>
+      <v-form>
+        <v-text-field
+            label="E-Mail"
+            outlined
+            type="text"
+            id="iEmail"
+            placeholder=" Email"
+            v-model="email"
+        />
+        <v-text-field
+            label="Passwort"
+            outlined
+            type="text"
+            id="iPasswort"
+            placeholder=" Passwort"
+            v-model="passwort"
+        />
+        <v-btn
+            type="submit"
+            @click.prevent="register"
+        >
+          Register
+        </v-btn>
+      </v-form>
+    </v-card>
   </div>
 </template>
 
 <script>
 import {getAuth, createUserWithEmailAndPassword, onAuthStateChanged} from "firebase/auth";
 import app from "../../../firebase";
+import router from "@/router";
 
 export default {
   name: "P-Register",
@@ -49,6 +66,9 @@ export default {
             // const errorCode = error.code;
             // const errorMessage = error.message;
             // ..
+          })
+          .finally(() => {
+              router.push('home')
           });
     },
   },

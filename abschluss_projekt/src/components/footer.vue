@@ -44,9 +44,6 @@ export default {
             'Home',
             'About',
             'Contact',
-            'Login',
-            'Register',
-            '/',
         ]
     }),
     methods: {

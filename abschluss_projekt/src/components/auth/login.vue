@@ -1,29 +1,50 @@
 <template>
   <div>
-    <form>
-      <label for="iEmail">Email</label>
-      <input
-          type="text"
-          id="iEmail"
-          placeholder=" Email"
-          v-model="email"
-      />
-      <label for="iPasswort">Passwort</label>
-      <input
-          type="text"
-          id="iPasswort"
-          placeholder=" Passwort"
-          v-model="passwort"
-      />
-      <input type="submit" value="Login" @click.prevent="login"/>
-    </form>
-    <button @click.prevent="logout">Logout</button>
-    <p>{{ user }}</p>
+    <v-card
+      class="card d-inline-flex"
+      rounded
+      width="400px"
+      height="400px"
+    >
+      <v-card-title
+        class="title"
+      >Login</v-card-title>
+      <v-form>
+        <v-text-field
+            label="E-Mail"
+            outlined
+            type="text"
+            id="iEmail"
+            placeholder=" Email"
+            v-model="email"
+        />
+        <v-text-field
+            label="Passwort"
+            outlined
+            type="text"
+            id="iPasswort"
+            placeholder=" Passwort"
+            v-model="passwort"
+        />
+        <v-btn
+            type="submit"
+            @click.prevent="login"
+        >
+          Login
+        </v-btn>
+        <v-btn
+            type="submit"
+            @click.prevent="openRegister"
+        >
+          Register
+        </v-btn>
+      </v-form>
+    </v-card>
   </div>
 </template>
 
 <script>
-import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import app from "../../../firebase";
 import router from "@/router";
 
@@ -31,12 +52,16 @@ export default {
   name: "P-Login",
   data() {
     return {
+      msg: '',
       user: '',
       email: '',
-      passwort: '',
+      passwort: ''
     }
   },
   methods: {
+    openRegister() {
+      router.push('register')
+    },
     login() {
       const auth = getAuth(app);
       const ref = this;
@@ -62,28 +87,17 @@ export default {
             }
       });
     },
-    logout() {
-      const auth = getAuth(app);
-      const ref = this;
-      signOut(auth).then(() => {
-        ref.user = '';
-        // Sign-out successful.
-      }).catch((error) => {
-        console.log(error)
-        // An error happened.
-      });
-    }
   },
   mounted() {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(user)
+        // console.log(user)
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
         this.user = user.email;
-        const uid = user.uid;
-        console.log(uid)
+        // const uid = user.uid;
+        // console.log(uid)
         // ...
       } else {
         // User is signed out
@@ -95,5 +109,11 @@ export default {
 </script>
 
 <style scoped>
+.card {
+  border-radius: 15px;
+}
+.title {
+  justify-content: center;
+}
 
 </style>

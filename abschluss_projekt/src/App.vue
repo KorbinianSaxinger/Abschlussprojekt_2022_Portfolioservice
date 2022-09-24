@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <app-header/>
+    <app-header class="header"/>
       <router-view/>
     <app-footer/>
   </div>
@@ -14,7 +14,9 @@
   text-align: center;
   color: #2c3e50;
 }
-
+.header {
+  background-color: transparent;
+}
 </style>
 <script>
 import AppFooter from "@/components/footer";

@@ -38,14 +38,7 @@ export default {
 h1 {
   color: white;
 }
-  /*@media  (max-width: 1900px) {*/
-  /*  .landingPage {*/
-  /*    height: 80px;*/
-  /*    width: 20px;*/
-  /*}*/
 
-
-/*}*/
 
 
 </style>
