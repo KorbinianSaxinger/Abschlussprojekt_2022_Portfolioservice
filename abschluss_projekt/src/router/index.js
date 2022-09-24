@@ -6,6 +6,7 @@ import Contact from "@/components/footerpages/Contact";
 import Login from "@/components/auth/login";
 import Register from "@/components/auth/register";
 import Landingpage from "@/components/landingpage";
+import addPortfolio from "@/components/portfolio/addPortfolio";
 
 Vue.use(VueRouter)
 
@@ -19,9 +20,6 @@ const routes = [
     path: '/Home',
     name: 'home',
     component: Home,
-    meta: {
-      requiresAuth: true
-    }
   },
   {
     path: '/Login',
@@ -37,19 +35,16 @@ const routes = [
     path: '/about',
     name: 'about',
     component: About
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    // component: () => import(/* webpackChunkName: "about" */ '../components/About.vue')
   },
   {
     path: '/Contact',
     name: 'contact',
     component: Contact
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    // component: () => import(/* webpackChunkName: "about" */ '../components/Contact')
+  },
+  {
+    path: '/adPortfolio',
+    name: 'adPortfolio',
+    component: addPortfolio
   }
 ]
 

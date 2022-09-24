@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <app-header class="header"/>
-      <router-view/>
+      <router-view
+        class="view"
+      />
     <app-footer/>
   </div>
 </template>
@@ -14,8 +16,19 @@
   text-align: center;
   color: #2c3e50;
 }
+
 .header {
   background-color: transparent;
+}
+.view {
+  background: url("assets/backgroundMD.jpg") no-repeat fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  height: 850px;
+  color: white;
+  /*width: 1900px;*/
 }
 </style>
 <script>

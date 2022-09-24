@@ -2,7 +2,7 @@
     <div class="footer">
         <v-footer
             padless
-            fixed
+
         >
             <v-row
                 justify="center"
@@ -44,6 +44,7 @@ export default {
             'Home',
             'About',
             'Contact',
+            'adPortfolio'
         ]
     }),
     methods: {

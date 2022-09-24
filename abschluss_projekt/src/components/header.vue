@@ -43,7 +43,7 @@ export default {
       const ref = this;
       signOut(auth).then(() => {
         ref.user = '';
-        console.log('Loget Out ',ref.user)
+        // console.log('Loget Out ',ref.user)
         // Sign-out successful.
       }).catch((error) => {
         console.log(error)
@@ -57,11 +57,11 @@ export default {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(user)
+        // console.log(user)
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
-        this.isLogedin = true
         this.user = user.email;
+        this.uid = user.uid;
         const uid = user.uid;
         console.log(uid)
         // ...

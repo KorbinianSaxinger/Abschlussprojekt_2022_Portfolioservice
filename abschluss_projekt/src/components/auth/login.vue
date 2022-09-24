@@ -30,13 +30,16 @@
             type="submit"
             @click.prevent="login"
         >
-          Login
+          Anmelden
         </v-btn>
         <v-btn
+            style="
+            margin-left: 30px; background-color: dimgrey;
+            "
             type="submit"
             @click.prevent="openRegister"
         >
-          Register
+          Oder Registrieren
         </v-btn>
       </v-form>
     </v-card>
@@ -55,7 +58,8 @@ export default {
       msg: '',
       user: '',
       email: '',
-      passwort: ''
+      passwort: '',
+      uid: ''
     }
   },
   methods: {
@@ -83,7 +87,7 @@ export default {
           })
           .finally(() => {
             if (ref.user !== '') {
-              router.push('home');
+              router.push('Home');
             }
       });
     },
@@ -96,8 +100,7 @@ export default {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
         this.user = user.email;
-        // const uid = user.uid;
-        // console.log(uid)
+        this.uid = user.uid;
         // ...
       } else {
         // User is signed out
@@ -111,6 +114,7 @@ export default {
 <style scoped>
 .card {
   border-radius: 15px;
+  margin-top: 10px;
 }
 .title {
   justify-content: center;

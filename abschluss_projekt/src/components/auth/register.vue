@@ -92,6 +92,13 @@ export default {
 }
 </script>
 
-<style scoped>
 
+<style scoped>
+.card {
+  margin-top: 10px;
+  border-radius: 15px;
+}
+.title {
+  justify-content: center;
+}
 </style>
