@@ -2,12 +2,14 @@
   <div
       class="header d-flex"
   >
+    <router-link to="/Home">
       <v-img
           class="logo align-left"
           max-height="100"
           max-width="100"
           src="../assets/logo.png"
       ></v-img>
+    </router-link>
           <p class="text-md-center">Portfolio Service Korbinian Saxinger</p>
   </div>
 </template>
