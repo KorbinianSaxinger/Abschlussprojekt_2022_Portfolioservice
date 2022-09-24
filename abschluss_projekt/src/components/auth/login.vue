@@ -57,7 +57,9 @@ export default {
             // const errorMessage = error.message;
           })
           .finally(() => {
-            router.push('home');
+            if (ref.user !== '') {
+              router.push('home');
+            }
       });
     },
     logout() {
