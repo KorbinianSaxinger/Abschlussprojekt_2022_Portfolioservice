@@ -4,9 +4,11 @@
     >
 
       <v-data-table
+        class="v-data-table"
         :headers="headers"
-        :items="portfolios"
+        :items="positions"
         must-sort
+        sort-desc
       >
         
       </v-data-table>
@@ -14,7 +16,7 @@
     <div
         v-if="user === ''"
     >
-      <p-login></p-login>
+      <PLogin></PLogin>
     </div>
   </v-container>
 </template>
@@ -23,39 +25,45 @@
 import axios from "axios";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../../firebase";
+import PLogin from "@/components/auth/login";
 
 export default {
-  name: "portfolioTable",
+  name: "portfolioPositions",
+  components: {PLogin},
   data() {
     return {
-      user: '',
       todo_neu: "",
-      portfolios: [],
-      text: 'test',
+      positions: [],
+      user: '',
       headers: [
-        {text: 'PortfolioID', value: 'portfolioId'},
-        {text: 'PortfolioName', value: 'portfolioName'},
-        {text: 'created', value: 'created'},
+        {text: 'Position', value: 'positionId'},
+        {text: 'Portfolio', value: 'portfolioId'},
+        {text: 'Name', value: 'Name'},
+        {text: 'ISIN', value: 'ISIN'},
+        {text: 'Anzahl', value: 'qty'},
+        {text: 'Kaufdatum', value: 'addDate'},
         {text: 'Aktion', value: '', sortable: false},
+
       ]
     }
   },
   beforeCreate() {
-    axios.get('http://localhost/api/getPortfolios.php').then(response  => (
-        this.portfolios = response.data
+    axios.get('http://localhost/api/getPositions.php').then(response  => (
+        this.positions = response.data
         )
     ).finally(() =>
-        console.log(this.portfolios[0].userId)
+        console.log(this.positions[0].userId)
     );
   },
   mounted() {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log(user)
+        console.log(user)
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
         this.user = user.uid;
+        console.log(user)
         // ...
       } else {
         // User is signed out
