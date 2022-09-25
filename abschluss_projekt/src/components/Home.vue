@@ -1,23 +1,14 @@
 <template>
   <div class="home">
-    <div
-      v-if="user !== ''"
+    <div v-if="user != ''"
     >
-      <h1>Home</h1>
-      <v-textarea
-          v-model="text"
-      ></v-textarea>
-      <v-btn class="btn" @click.prevent="fetchData">Lade Daten</v-btn>
-      <v-list v-for="item in todo_list" :key="item.id">
-          <v-list-item> {{ item }}</v-list-item>
-      </v-list>
+      <portfolio-table/>
     </div>
     <div
-        v-if="user === ''"
+      v-if="user === ''"
     >
-    <p-login></p-login>
+      <p-login/>
     </div>
-
   </div>
 </template>
 
@@ -25,25 +16,26 @@
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../firebase";
 import PLogin from "@/components/auth/login";
-import axios from "vue-axios";
-
+import PortfolioTable from "@/components/portfolios/portfolioTable";
+// const axios = require('axios')
 export default {
   name: "PHome",
-  components: {PLogin},
+  components: {PLogin, PortfolioTable},
   data() {
     return {
-      todo_neu: "",
-      todo_list: [],
-      text: 'test',
       user: '',
       email: '',
       passwort: '',
     }
   },
   methods: {
-    fetchData() {
-      axios.get('http://127.0.0.1/get.php').then(response => (this.todo_list = response.data));
-    }
+    // fetchData() {
+    //   axios.get('http://localhost/get.php').then(response  => (
+    //       this.todo_list = response.data)
+    //   ).finally(() =>
+    //       this.text = ''
+    //   );
+    // }
   },
   mounted() {
     const auth = getAuth(app);
