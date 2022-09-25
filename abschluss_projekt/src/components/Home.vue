@@ -1,16 +1,14 @@
 <template>
   <div class="home">
-    <div
-      v-if="user !== ''"
+    <div v-if="user != ''"
     >
-      <h1>Home</h1>
+      <portfolio-table/>
     </div>
     <div
-        v-if="user === ''"
+      v-if="user === ''"
     >
-    <p-login></p-login>
+      <p-login/>
     </div>
-
   </div>
 </template>
 
@@ -18,16 +16,26 @@
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../firebase";
 import PLogin from "@/components/auth/login";
-
+import PortfolioTable from "@/components/portfolios/portfolioTable";
+// const axios = require('axios')
 export default {
   name: "PHome",
-  components: {PLogin},
+  components: {PLogin, PortfolioTable},
   data() {
     return {
       user: '',
       email: '',
       passwort: '',
     }
+  },
+  methods: {
+    // fetchData() {
+    //   axios.get('http://localhost/get.php').then(response  => (
+    //       this.todo_list = response.data)
+    //   ).finally(() =>
+    //       this.text = ''
+    //   );
+    // }
   },
   mounted() {
     const auth = getAuth(app);

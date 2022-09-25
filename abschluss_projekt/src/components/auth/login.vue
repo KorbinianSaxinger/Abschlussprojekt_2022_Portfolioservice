@@ -89,6 +89,7 @@ export default {
     },
   },
   mounted() {
+    console.log('login')
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
