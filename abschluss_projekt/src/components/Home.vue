@@ -2,7 +2,7 @@
   <div class="home">
     <div v-if="user != ''"
     >
-      <portfolio-table/>
+      <portfolio-tabs/>
     </div>
     <div
       v-if="user === ''"
@@ -16,11 +16,11 @@
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../firebase";
 import PLogin from "@/components/auth/login";
-import PortfolioTable from "@/components/portfolios/portfolioTable";
+import PortfolioTabs from "@/components/portfolios/portfolioTabs";
 // const axios = require('axios')
 export default {
   name: "PHome",
-  components: {PLogin, PortfolioTable},
+  components: {PortfolioTabs,  PLogin},
   data() {
     return {
       user: '',
@@ -41,12 +41,9 @@ export default {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(user)
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
-        this.user = user.email;
-        const uid = user.uid;
-        console.log(uid)
+        this.user = user.uid;
         // ...
       } else {
         // User is signed out
