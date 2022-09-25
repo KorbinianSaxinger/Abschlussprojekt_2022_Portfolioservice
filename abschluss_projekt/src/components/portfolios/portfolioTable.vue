@@ -3,10 +3,13 @@
     <div
         v-if="user !== ''"
     >
-      <h1>Home</h1>
-      <v-list v-for="item in todo_list" :key="item.portfolioId">
-        <v-list-item> {{ item }}</v-list-item>
-      </v-list>
+
+      <v-data-table
+        :headers="headers"
+        :items="todo_list"
+      >
+        
+      </v-data-table>
     </div>
     <div
         v-if="user === ''"
@@ -31,13 +34,19 @@ export default {
       user: '',
       email: '',
       passwort: '',
+      headers: [
+        {text: 'PortfolioID', value: 'portfolioId'},
+        {text: 'PortfolioName', value: 'portfolioName'},
+        {text: 'created', value: 'created'},
+      ]
     }
   },
   beforeCreate() {
     axios.get('http://localhost/api/getPortfolios.php').then(response  => (
-        this.todo_list = response.data)
+        this.todo_list = response.data
+        )
     ).finally(() =>
-        this.text = ''
+        console.log(this.todo_list[0].userId)
     );
   },
   mounted() {
