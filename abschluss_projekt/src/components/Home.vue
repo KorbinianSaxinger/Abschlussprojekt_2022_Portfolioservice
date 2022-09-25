@@ -3,8 +3,6 @@
     <div v-if="user != ''"
     >
       <portfolio-tabs/>
-<!--      <portfolio-table/>-->
-<!--      <portfolio-positions/>-->
     </div>
     <div
       v-if="user === ''"
@@ -18,13 +16,11 @@
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../firebase";
 import PLogin from "@/components/auth/login";
-import PortfolioTable from "@/components/portfolios/portfolioTable";
-import PortfolioPositions from "@/components/portfolios/portfolioPositions";
 import PortfolioTabs from "@/components/portfolios/portfolioTabs";
 // const axios = require('axios')
 export default {
   name: "PHome",
-  components: {PortfolioTabs, PortfolioPositions, PLogin, PortfolioTable},
+  components: {PortfolioTabs,  PLogin},
   data() {
     return {
       user: '',
