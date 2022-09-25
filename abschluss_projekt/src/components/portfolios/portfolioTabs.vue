@@ -104,16 +104,7 @@ export default {
     });
   },
   watch: {
-    pid() {
 
-      axios.get('http://localhost:3000/portfolios/').then(response  => (
-              this.portfoliotabs = response.data
-          )
-      );
-    },
-    length (val) {
-      this.tab = val - 1
-    },
   },
 }
 </script>
