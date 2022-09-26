@@ -27,8 +27,14 @@
             v-model="passwort"
         />
         <v-btn
-            type="submit"
-            @click.prevent="register"
+          type="submit"
+          @click.prevent="backToLogin"
+        >
+          Zurück zum login
+        </v-btn>
+        <v-btn
+          type="submit"
+          @click.prevent="register"
         >
           Register
         </v-btn>
@@ -52,6 +58,9 @@ export default {
     }
   },
   methods: {
+    backToLogin() {
+        router.push('login')
+    },
     register() {
       const auth = getAuth(app);
       createUserWithEmailAndPassword(auth, this.email, this.passwort)
@@ -93,5 +102,7 @@ export default {
 </script>
 
 <style scoped>
-
+.card {
+  margin-top: 10px;
+}
 </style>

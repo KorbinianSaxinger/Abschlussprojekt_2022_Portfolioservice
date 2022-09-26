@@ -5,21 +5,16 @@
           v-model="tab"
           background-color="red lighten-2"
       >
-        <div>
-
-        </div>
         <v-tab
             v-for="item in portfoliotabs"
             :key="item.portfolioId"
-            @click="testFunction(item.portfolioId)"
+            @click="getPositions(item.portfolioId)"
         >
             {{ item.name }}
         </v-tab>
       </v-tabs>
     </v-card>
-
-    <div
-    >
+    <div>
       <v-data-table
           class="v-data-table"
           :headers="headers"
@@ -27,7 +22,7 @@
           must-sort
           sort-desc
       >
-
+        <div></div>
       </v-data-table>
     </div>
   </v-container>
@@ -53,12 +48,13 @@ export default {
       {text: 'ISIN', value: 'isin'},
       {text: 'Anzahl', value: 'qty'},
       {text: 'Kaufdatum', value: 'created'},
+      {text: 'Preis', value: 'price'},
       {text: 'Aktion', value: '', sortable: false},
 
     ]
   }),
   methods: {
-    testFunction(id) {
+    getPositions(id) {
       const strid = id.toString()
       const url = 'http://localhost:3000/positions/?portfolioId=' + strid
       axios.get(url).then(response  => (
@@ -104,16 +100,7 @@ export default {
     });
   },
   watch: {
-    pid() {
 
-      axios.get('http://localhost:3000/portfolios/').then(response  => (
-              this.portfoliotabs = response.data
-          )
-      );
-    },
-    length (val) {
-      this.tab = val - 1
-    },
   },
 }
 </script>

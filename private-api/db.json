@@ -1,0 +1,75 @@
+{
+    "portfolios": [
+      {
+        "portfolioId": 1,
+        "userId": "68TguirHpcZBlxxqFElRu47Qv6q2",
+        "name": "TestFolioOne"
+      },
+      {
+        "portfolioId": 2,
+        "userId": "68TguirHpcZBlxxqFElRu47Qv6q2",
+        "name": "TestFolioTwo"
+      },
+      {
+        "portfolioId": 3,
+        "userId": "606hVkIHlFRATnJ6GrlBpXO72IV2",
+        "name": "TestFolioThree"
+      }
+    ],
+    "positions": [
+      {
+        "id": 1,
+        "portfolioId": 1,
+        "name": "TestPositionOne",
+        "isin": "DE1234567890",
+        "qty": 10,
+        "price": 132,
+        "created": "2022-09-25"
+      },
+      {
+        "id": 2,
+        "portfolioId": 2,
+        "name": "TestPositionTwo",
+        "isin": "EN0987654321",
+        "qty": 47,
+        "price": 11,
+        "created": "2022-09-25"
+      },
+      {
+        "id": 3,
+        "portfolioId": 3,
+        "name": "TestPositionThree",
+        "isin": "EN0987654321",
+        "qty": 47,
+        "price": 11,
+        "created": "2022-09-25"
+      },
+      {
+        "id": 4,
+        "portfolioId": 1,
+        "name": "TestPositionFour",
+        "isin": "EN0987654321",
+        "qty": 182,
+        "price": 120,
+        "created": "2022-02-20"
+      },
+      {
+        "id": 5,
+        "portfolioId": 1,
+        "name": "TestPositionFive",
+        "isin": "BR5678493201",
+        "qty": 1822,
+        "price": 120,
+        "created": "2022-02-20"
+      },
+      {
+        "id": 6,
+        "portfolioId": 2,
+        "name": "TestPositionFive",
+        "isin": "TestMongo",
+        "qty": 19281271782,
+        "price": 1200,
+        "created": "2022-02-20"
+      }
+    ]
+  }
