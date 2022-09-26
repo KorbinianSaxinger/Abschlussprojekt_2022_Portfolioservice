@@ -57,13 +57,13 @@ export default {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(user)
+        // console.log(user)
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
         this.isLogedin = true
-        this.user = user.email;
-        const uid = user.uid;
-        console.log(uid)
+        this.user = user.uid;
+        // const uid = user.uid;
+        // console.log(uid)
         // ...
       } else {
         // User is signed out
