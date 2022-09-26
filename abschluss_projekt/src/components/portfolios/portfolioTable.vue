@@ -14,7 +14,6 @@
     <div
         v-if="user === ''"
     >
-      <p-login></p-login>
     </div>
   </v-container>
 </template>

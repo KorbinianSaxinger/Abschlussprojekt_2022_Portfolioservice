@@ -61,6 +61,15 @@
         "qty": 1822,
         "price": 120,
         "created": "2022-02-20"
+      },
+      {
+        "id": 6,
+        "portfolioId": 2,
+        "name": "TestPositionFive",
+        "isin": "TestMongo",
+        "qty": 19281271782,
+        "price": 1200,
+        "created": "2022-02-20"
       }
     ]
   }

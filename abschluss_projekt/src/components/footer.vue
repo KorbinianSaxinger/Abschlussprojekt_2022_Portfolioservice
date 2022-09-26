@@ -44,6 +44,7 @@ export default {
             'Home',
             'About',
             'Contact',
+            'chart',
         ]
     }),
     methods: {
