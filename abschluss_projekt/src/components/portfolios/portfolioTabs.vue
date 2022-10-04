@@ -72,9 +72,12 @@
 </template>
 
 <script>
-import axios from "axios";
-import {getAuth, onAuthStateChanged} from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { setDoc  } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import app from "../../../firebase";
+import { getFirestore } from "firebase/firestore";
+
 
 export default {
   name: "portfolioTabs",
@@ -102,75 +105,79 @@ export default {
       this.addPortfolio = true
     },
 
-    createPortfolio() {
-      // Simple POST request with a JSON body using axios
-      const portfolio = {
-        id: null,
-        userId: this.user,
-        name: this.portfolioName
-      };
-      axios.post("http://localhost:3000/portfolios/", portfolio)
-          .then(response => this.portfolio = response.data.id)
-          .finally(() => {
+    idExists(id) {
+      return this.portfoliotabs.filter(portfolio => portfolio.id === id).length > 0;
+    },
 
-          });
-      // console.log(this.portfolioName)
-      this.fetchPortfolios()
-      this.addPortfolio = false
+    PortfolioExists(name) {
+      return this.portfoliotabs.filter(portfolio => portfolio.name.toUpperCase() === name.toUpperCase()).length > 0;
+    },
+
+    GetNewPortfolioID() {
+      const portfolios = this.portfoliotabs.length
+      if(portfolios < 1) return 0
+      return this.portfoliotabs[portfolios-1].id + 1
+    },
+
+    async createPortfolio() {
+      if(!this.PortfolioExists(this.portfolioName)) {
+        const userPortfolios = [];
+        for (let i = 0; i < this.portfoliotabs.length; i++) {
+          const portfolio =  this.portfoliotabs[i];
+          userPortfolios.push(portfolio);
+        }
+
+        const createdPortfolio = {
+          name: this.portfolioName,
+          id: this.GetNewPortfolioID()
+        };
+        userPortfolios.push(createdPortfolio);
+
+        const portfolio = {
+          portfolios: userPortfolios
+        };
+
+        try {
+          const db = getFirestore(app);
+          await setDoc(doc(db, "portfolios", this.user), portfolio);
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
+
+        await this.fetchPortfolios()
+        this.addPortfolio = false
+      } else {
+        console.log("LAK DU CHUND")
+      }
     },
 
     closeCreatePortfolio() {
       this.addPortfolio = false
     },
-    getPositions(id) {
-      const strid = id.toString()
-      const url = 'http://localhost:3000/positions/?portfolioId=' + strid
-      axios.get(url).then(response  => (
-              this.positions = response.data
-          )
-      ).finally(() =>
-          // console.log(this.positions[0].id)
-          console.log('switched portfolio')
-      );
+
+    async getPositions(id) {
+      const db = getFirestore(app);
+      const docRef = doc(db, "positions", this.user);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const JSONString = JSON.stringify(docSnap.data());
+        const JSONObject = JSON.parse(JSONString);
+        this.positions = JSONObject.positions.filter(position => position.portfolioId === id);
+      }
     },
-    fetchPortfolios() {
-      const auth = getAuth(app);
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          this.user = user.uid;
-          const url = 'http://localhost:3000/portfolios/?userId=' + this.user
 
-          axios.get(url).then(response  => (
-                  this.portfoliotabs = response.data
-              )
-          ).finally(() => {
+    async fetchPortfolios() {
+      const db = getFirestore(app);
+      const docRef = doc(db, "portfolios", this.user);
+      const docSnap = await getDoc(docRef);
 
-          });
-          // ...
-        } else {
-          // User is signed out
-          // ...
-        }
-      });
+      if (docSnap.exists()) {
+        const JSONString = JSON.stringify(docSnap.data());
+        const JSONObject = JSON.parse(JSONString);
+        this.portfoliotabs = JSONObject.portfolios;
+      }
     },
-    fetchPositions() {
-      const auth = getAuth(app);
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          const strid = this.portfoliotabs[0].id
-          //
-          const url = 'http://localhost:3000/positions/?portfolioId=' + strid
-
-          axios.get(url).then(response  => (
-                  this.positions = response.data
-              )
-          );
-        } else {
-          // User is signed out
-          // ...
-        }
-      });
-    }
   },
   computed: {
 
@@ -180,27 +187,11 @@ export default {
   },
   mounted() {
     const auth = getAuth(app);
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         this.user = user.uid;
-        const url = 'http://localhost:3000/portfolios/?userId=' + this.user
-
-        axios.get(url).then(response  => (
-            this.portfoliotabs = response.data
-          )
-        ).finally(() => {
-          const strid = this.portfoliotabs[0].id
-          const url = 'http://localhost:3000/positions/?portfolioId=' + strid
-
-          axios.get(url).then(response  => (
-              this.positions = response.data
-            )
-          );
-        });
-        // ...
-      } else {
-        // User is signed out
-        // ...
+        await this.fetchPortfolios();
+        await this.getPositions(this.portfoliotabs[0].id);
       }
     });
   },
