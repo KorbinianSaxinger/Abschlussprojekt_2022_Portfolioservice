@@ -6,6 +6,7 @@ import Contact from "@/components/footerpages/Contact";
 import Login from "@/components/auth/login";
 import Register from "@/components/auth/register";
 import Landingpage from "@/components/landingpage";
+import portfolioTabs from "@/components/portfolios/portfolioTabs";
 
 Vue.use(VueRouter)
 
@@ -46,10 +47,12 @@ const routes = [
     path: '/Contact',
     name: 'contact',
     component: Contact
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    // component: () => import(/* webpackChunkName: "about" */ '../components/Contact')
+  },
+  {
+    path: '/portfolios/:portfolioId',
+    name: 'portfolios',
+    props: true,
+    component: portfolioTabs
   }
 ]
 

@@ -32,7 +32,7 @@ export default {
       portfolios: [],
       text: 'test',
       headers: [
-        {text: 'PortfolioID', value: 'portfolioId'},
+        {text: 'PortfolioID', value: 'id'},
         {text: 'PortfolioName', value: 'portfolioName'},
         {text: 'created', value: 'created'},
         {text: 'Aktion', value: '', sortable: false},
