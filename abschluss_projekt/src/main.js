@@ -6,6 +6,7 @@ import router from './router'
 import axios from 'vue-axios'
 
 Vue.prototype.$http = axios;
+export const bus = new Vue()
 
 const token = localStorage.getItem('token');
 if (token) {
