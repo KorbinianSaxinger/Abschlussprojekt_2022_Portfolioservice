@@ -2,16 +2,7 @@
   <v-container>
 
     <v-card class="d-flex justify-end" width="1045">
-      <v-btn
-          type="submit"
-          class="button"
-          color="green"
-          @click.prevent="openPortfolioCard"
-      >
-        <v-icon
-            style="color: green"
-        >mdi-plus</v-icon>
-      </v-btn>
+
       <v-tabs
           class="tabs"
       >
@@ -24,7 +15,16 @@
             {{ item.name }}
         </v-tab>
       </v-tabs>
-
+      <v-btn
+          type="submit"
+          class="button"
+          color="green"
+          @click.prevent="openPortfolioCard"
+      >
+        <v-icon
+            style="color: green"
+        >mdi-plus</v-icon>
+      </v-btn>
     </v-card>
 
     <v-card
@@ -49,7 +49,7 @@
       </v-text-field>
       <v-btn
           type="submit"
-          class="button d-inline-flex text-center"
+          class="createButton d-inline-flex text-center"
           width="100"
           @click.prevent="createPortfolio"
       >
@@ -59,7 +59,7 @@
 
     <div>
       <v-data-table
-          v-if="addPortfolio !== true"
+          v-if="addPortfolio !== true && positions.length > 0"
           class="v-data-table"
           :headers="headers"
           :items="positions"
@@ -89,14 +89,12 @@ export default {
     portfolio: '',
     portfoliotabs: [],
     headers: [
-      {text: 'id', value: 'id'},
-      {text: 'Portfolio', value: 'id'},
-      {text: 'Name', value: 'name'},
-      {text: 'ISIN', value: 'isin'},
-      {text: 'Anzahl', value: 'qty'},
-      {text: 'Kaufdatum', value: 'created'},
-      {text: 'Preis', value: 'price'},
-      {text: 'Aktion', value: '', sortable: false},
+      {text: 'Name', value: 'name', align: 'left'},
+      {text: 'ISIN', value: 'isin', align: 'left'},
+      {text: 'Anzahl', value: 'quantity', align: 'left'},
+      {text: 'Kaufdatum', value: 'created', align: 'left'},
+      {text: 'Preis', value: 'price', align: 'left'},
+      {text: 'Aktion', value: '', sortable: false, align: 'left'},
 
     ]
   }),
@@ -201,8 +199,8 @@ export default {
 
 <style scoped>
 .button {
-  /*position: relative;*/
-  margin: 6px 0px 0px 0px;
+  position: fixed;
+  margin: 6px 0px 0px 1050px;
 }
 .tabs {
   color: green;
