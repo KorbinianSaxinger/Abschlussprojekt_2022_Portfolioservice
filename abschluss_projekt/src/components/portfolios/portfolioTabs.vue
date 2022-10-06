@@ -17,6 +17,7 @@
         type="submit"
         class="button"
         color="green"
+        dark
         @click.prevent="openAddPortfolio"
       >
         <v-icon
@@ -27,6 +28,7 @@
           type="submit"
           class="addPositionBtn"
           color="green"
+          dark
           @click.prevent="openAddPosition"
       >
         <v-icon

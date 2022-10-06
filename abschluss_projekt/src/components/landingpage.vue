@@ -13,13 +13,32 @@
 </template>
 
 <script>
+import {getAuth, onAuthStateChanged} from "firebase/auth";
+import app from "../../firebase";
+import router from "@/router";
+
 export default {
+  user: null,
   name: "PLanding",
   data() {
     return {
 
     }
 },
+  mounted() {
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        this.user = user.uid;
+        await this.fetchPortfolios();
+        await this.getPositions(this.portfoliotabs[0].id);
+      }
+    });
+
+    if (this.user !== null) {
+      router.push('home')
+    }
+  },
 }
 </script>
 
