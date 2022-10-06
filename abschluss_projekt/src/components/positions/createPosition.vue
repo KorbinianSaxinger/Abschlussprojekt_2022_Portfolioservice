@@ -7,7 +7,7 @@
       rounded
     >
       <v-card-title
-        class="cardTitle d-flex"
+        class="cardTitle flex-row"
       >
         Position erstellen
         <v-icon
@@ -16,29 +16,33 @@
         >mdi-close</v-icon>
       </v-card-title>
       <v-text-field
-        label="ISIN"
+        class="textField"
         v-model="isin"
-        placeholder="DE1234567890"
+        outlined
+        placeholder="ISIN"
       ></v-text-field>
       <v-text-field
-          label="Name"
+          class="textField"
           v-model="name"
-          placeholder="MusterAktie"
+          outlined
+          placeholder="Name"
       ></v-text-field>
       <v-text-field
-          label="Menge"
+          class="textField"
           v-model="qty"
-          placeholder="10"
+          outlined
+          placeholder="Menge"
       ></v-text-field>
       <v-text-field
-          label="Preis"
+          class="textField"
           v-model="price"
-          placeholder="10"
+          outlined
+          placeholder="Preis"
       ></v-text-field>
       <v-btn
         @click="createPosition"
-      >
-        OK
+        class="okBtn"
+      ><span style="color: green">OK</span>
       </v-btn>
     </v-card>
   </v-container>
@@ -152,6 +156,11 @@ export default {
 </script>
 
 <style scoped>
+.textField {
+  color: green;
+  margin-left: 10%;
+  width: 80%;
+}
 .v-card {
   width: 400px;
 }
