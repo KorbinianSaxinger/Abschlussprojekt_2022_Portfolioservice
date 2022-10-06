@@ -1,32 +1,39 @@
 <template>
   <v-container>
-
     <v-card class="d-flex justify-end" width="1045">
-      <v-btn
-          type="submit"
-          class="button"
-          color="green"
-          @click.prevent="openPortfolioCard"
-      >
-        <v-icon
-            style="color: green"
-        >mdi-plus</v-icon>
-      </v-btn>
       <v-tabs
           class="tabs"
       >
         <v-tab
-            class="testCard"
-            v-for="item in portfoliotabs"
-            :key="item.id"
+          class="testCard"
+          v-for="item in portfoliotabs"
+          :key="item.id"
             @click="getPositions(item.id)"
         >
             {{ item.name }}
         </v-tab>
       </v-tabs>
-
+      <v-btn
+        type="submit"
+        class="button"
+        color="green"
+        @click.prevent="openAddPortfolio"
+      >
+        <v-icon
+          style="color: green"
+        >mdi-plus</v-icon>
+      </v-btn>
+      <v-btn
+          type="submit"
+          class="addPositionBtn"
+          color="green"
+          @click.prevent="openAddPosition"
+      >
+        <v-icon
+            style="color: red"
+        >mdi-plus</v-icon>
+      </v-btn>
     </v-card>
-
     <v-card
         v-if="addPortfolio === true"
         class="addcard"
@@ -49,22 +56,27 @@
       </v-text-field>
       <v-btn
           type="submit"
-          class="button d-inline-flex text-center"
+          class="createButton d-inline-flex text-center"
           width="100"
           @click.prevent="createPortfolio"
       >
         Erstellen
       </v-btn>
     </v-card>
-
     <div>
+      <create-position
+        class="addPosition"
+        v-if="addPosition === true"
+        v-on:close-positions="closeAddPosition"
+      >
+      </create-position>
       <v-data-table
-          v-if="addPortfolio !== true"
-          class="v-data-table"
-          :headers="headers"
-          :items="positions"
-          must-sort
-          sort-desc
+        v-if="addPosition !== true && addPortfolio !== true && positions.length > 0"
+        class="v-data-table"
+        :headers="headers"
+        :items="positions"
+        must-sort
+        sort-desc
       >
       </v-data-table>
     </div>
@@ -77,31 +89,37 @@ import { setDoc  } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import app from "../../../firebase";
 import { getFirestore } from "firebase/firestore";
-
+import CreatePosition from "@/components/positions/createPosition";
 
 export default {
   name: "portfolioTabs",
+  components: {CreatePosition},
   data: () => ({
     addPortfolio: false,
+    addPosition: false,
     portfolioName: '',
     positions: [],
     user: '',
     portfolio: '',
     portfoliotabs: [],
     headers: [
-      {text: 'id', value: 'id'},
-      {text: 'Portfolio', value: 'id'},
-      {text: 'Name', value: 'name'},
-      {text: 'ISIN', value: 'isin'},
-      {text: 'Anzahl', value: 'qty'},
-      {text: 'Kaufdatum', value: 'created'},
-      {text: 'Preis', value: 'price'},
-      {text: 'Aktion', value: '', sortable: false},
+      {text: 'Name', value: 'name', align: 'left'},
+      {text: 'ISIN', value: 'isin', align: 'left'},
+      {text: 'Anzahl', value: 'quantity', align: 'left'},
+      {text: 'Kaufdatum', value: 'created', align: 'left'},
+      {text: 'Preis', value: 'price', align: 'left'},
+      {text: 'Aktion', value: '', sortable: false, align: 'left'},
 
     ]
   }),
   methods: {
-    openPortfolioCard() {
+    openAddPosition() {
+      this.addPosition = true
+    },
+    closeAddPosition() {
+      this.addPosition = false
+    },
+    openAddPortfolio() {
       this.addPortfolio = true
     },
 
@@ -131,6 +149,7 @@ export default {
           name: this.portfolioName,
           id: this.GetNewPortfolioID()
         };
+
         userPortfolios.push(createdPortfolio);
 
         const portfolio = {
@@ -147,7 +166,7 @@ export default {
         await this.fetchPortfolios()
         this.addPortfolio = false
       } else {
-        console.log("LAK DU CHUND")
+        // console.log("LAK DU CHUND")
       }
     },
 
@@ -155,7 +174,14 @@ export default {
       this.addPortfolio = false
     },
 
+    safePortfolioID(portfolioID) {
+      localStorage.portfolioID = portfolioID
+    },
+
     async getPositions(id) {
+
+      this.safePortfolioID(id)
+
       const db = getFirestore(app);
       const docRef = doc(db, "positions", this.user);
       const docSnap = await getDoc(docRef);
@@ -163,7 +189,7 @@ export default {
       if (docSnap.exists()) {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
-        this.positions = JSONObject.positions.filter(position => position.portfolioId === id);
+        this.positions = JSONObject.positions.filter(position => position.portfolioId == id);
       }
     },
 
@@ -181,9 +207,16 @@ export default {
   },
   computed: {
 
-  },
-  beforeCreate() {
 
+  },
+  watch: {
+    addPosition() {
+      if(this.addPosition === false) {
+        // console.log(localStorage.portfolioID)
+        this.getPositions(localStorage.portfolioID)
+      }
+      console.log('positionChanged')
+    }
   },
   mounted() {
     const auth = getAuth(app);
@@ -200,8 +233,12 @@ export default {
 
 <style scoped>
 .button {
-  /*position: relative;*/
-  margin: 6px 0px 0px 0px;
+  position: absolute;
+  margin: 6px 0px 0px 1050px;
+}
+.addPositionBtn {
+  position: absolute;
+  margin: 6px 0px 0px 1130px;
 }
 .tabs {
   color: green;
@@ -211,12 +248,19 @@ export default {
   margin-top: 20px;
   border-radius: 10px;
 }
+.addPosition {
+  margin: 10px 0% 0px 30%;
+  width: 600px;
+  height: 200px;
+  border-color: black;
+  border-radius: 10px
+}
 .addcard {
   margin: 10px 0% 0px 35%;
   width: 300px;
   height: 200px;
   border-color: black;
-  border-radius: 0px 10px 0px 10px;
+  border-radius: 10px
 }
 .iconClose {
   margin-left: 80px;

@@ -7,6 +7,7 @@ import Login from "@/components/auth/login";
 import Register from "@/components/auth/register";
 import Landingpage from "@/components/landingpage";
 import portfolioTabs from "@/components/portfolios/portfolioTabs";
+import createPosition from "@/components/positions/createPosition";
 
 Vue.use(VueRouter)
 
@@ -53,7 +54,14 @@ const routes = [
     name: 'portfolios',
     props: true,
     component: portfolioTabs
-  }
+  },
+  {
+    path: '/positions',
+    name: 'createPosition',
+    props: true,
+    component: createPosition
+  },
+
 ]
 
 const router = new VueRouter({
