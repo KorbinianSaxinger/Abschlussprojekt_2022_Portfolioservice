@@ -43,7 +43,6 @@ export default {
 </script>
 
 <style scoped>
-/*@import '~vuetify/src/styles/styles.sass';*/
 
 .landingPage {
   background: url("../assets/backgroundMD.jpg") no-repeat fixed;
