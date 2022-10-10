@@ -16,6 +16,13 @@
           @click.prevent="closeCard"
         >mdi-close</v-icon>
       </v-card-title>
+      <v-date-picker
+          class="picker"
+          v-if="datePicker === true"
+          v-model="date"
+          @change="changeDate"
+      >
+      </v-date-picker>
       <v-radio-group
         v-model="row"
         row
@@ -53,6 +60,9 @@
           outlined
           placeholder="Preis"
       ></v-text-field>
+      <v-icon
+        @click.prevent="datePicker = true"
+      >mdi-calendar</v-icon><br>
       <v-btn
         @click="createPosition"
         class="okBtn"
@@ -71,6 +81,8 @@ export default {
   name: "createPosition",
   data() {
     return {
+      datePicker: false,
+      date: null,
       user: '',
       isin: '',
       name: '',
@@ -89,6 +101,10 @@ export default {
     }
   },
   methods: {
+    changeDate() {
+      this.datePicker = false
+      console.log(this.date)
+    },
     changeTransactionType(type) {
       this.type = type
     },
@@ -118,8 +134,8 @@ export default {
         quantity: qty,
         price: parseFloat(this.price),
         portfolioId: parseInt(this.portfolioID),
+        created: this.date,
         id: this.GetNewPositionID(),
-        action: ''
       };
 
       newPositions.push(createdPosition);
@@ -190,6 +206,11 @@ export default {
 </script>
 
 <style scoped>
+.picker {
+  position: absolute;
+  margin-left: 250px;
+  margin-bottom: 1250px;
+}
 .textField {
   color: green;
   margin-left: 10%;
