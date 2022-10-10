@@ -1,6 +1,8 @@
 <template>
   <v-container>
-    <v-card class="d-flex justify-end" width="1045">
+    <v-card
+        v-if="portfoliotabs != ''"
+        class="d-flex justify-end" width="1205">
       <v-tabs
           class="tabs"
       >
@@ -36,6 +38,15 @@
         >mdi-plus</v-icon>
       </v-btn>
     </v-card>
+    <div
+      v-if="portfoliotabs == ''"
+    >
+      <v-progress-circular
+          class="loading"
+          :size="50"
+          indeterminate
+      ></v-progress-circular>
+    </div>
     <v-card
         v-if="addPortfolio === true"
         class="addcard"
@@ -80,6 +91,21 @@
         must-sort
         sort-desc
       >
+
+        <template v-slot:[`item.value`]="{ item }">
+          {{ item.price * item.quantity + ' €'}}
+        </template>
+
+        <template v-slot:[`item.price`]="{ item }">
+          {{ item.price + ' €'}}
+        </template>
+
+        <template v-slot:[`item.action`]="{ item }">
+          <v-icon
+            @click="deletePosition(item.id)"
+          >mdi-delete</v-icon>
+        </template>
+
       </v-data-table>
     </div>
   </v-container>
@@ -110,7 +136,8 @@ export default {
       {text: 'Anzahl', value: 'quantity', align: 'left'},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
       {text: 'Preis', value: 'price', align: 'left'},
-      {text: 'Aktion', value: '', sortable: false, align: 'left'},
+      {text: 'Gesamtpreis', value: 'value', align: 'left'},
+      {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
 
     ]
   }),
@@ -123,6 +150,10 @@ export default {
     },
     openAddPortfolio() {
       this.addPortfolio = true
+    },
+
+    deletePosition(id) {
+      console.log(id)
     },
 
     idExists(id) {
@@ -195,6 +226,7 @@ export default {
       }
     },
 
+
     async fetchPortfolios() {
       const db = getFirestore(app);
       const docRef = doc(db, "portfolios", this.user);
@@ -234,13 +266,17 @@ export default {
 </script>
 
 <style scoped>
+.loading {
+  margin-top: 80px;
+  color: red;
+}
 .button {
   position: absolute;
-  margin: 6px 0px 0px 1050px;
+  margin: 6px 0px 0px 1120px;
 }
 .addPositionBtn {
   position: absolute;
-  margin: 6px 0px 0px 1130px;
+  margin: 6px 0px 0px 1200px;
 }
 .tabs {
   color: green;

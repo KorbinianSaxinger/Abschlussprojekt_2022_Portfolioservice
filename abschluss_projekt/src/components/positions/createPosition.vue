@@ -118,7 +118,8 @@ export default {
         quantity: qty,
         price: parseFloat(this.price),
         portfolioId: parseInt(this.portfolioID),
-        id: this.GetNewPositionID()
+        id: this.GetNewPositionID(),
+        action: ''
       };
 
       newPositions.push(createdPosition);
