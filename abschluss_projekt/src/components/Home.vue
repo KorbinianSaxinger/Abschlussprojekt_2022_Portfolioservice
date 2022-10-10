@@ -4,23 +4,18 @@
     >
       <portfolio-tabs/>
     </div>
-    <div
-      v-if="user === ''"
-    >
-      <p-login/>
-    </div>
   </div>
 </template>
 
 <script>
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../firebase";
-import PLogin from "@/components/auth/login";
+// import PLogin from "@/components/auth/login";
 import PortfolioTabs from "@/components/portfolios/portfolioTabs";
 // const axios = require('axios')
 export default {
   name: "PHome",
-  components: {PortfolioTabs,  PLogin},
+  components: {PortfolioTabs},
   data() {
     return {
       user: '',
@@ -54,6 +49,7 @@ export default {
 }
 </script>
 <style scoped>
+
 .home {
     background: url("../assets/backgroundMD.jpg") no-repeat fixed;
     -webkit-background-size: cover;
