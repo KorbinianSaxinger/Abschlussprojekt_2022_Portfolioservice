@@ -1,6 +1,7 @@
 <template>
   <v-container
-    class="flex-column"
+    class="px-0"
+    fluid
   >
     <v-card
       class="v-card"
@@ -15,6 +16,19 @@
           @click.prevent="closeCard"
         >mdi-close</v-icon>
       </v-card-title>
+      <v-radio-group
+        v-model="row"
+        row
+      >
+        <v-radio
+          v-for="radio in radioItems"
+          :key="radio.value"
+          :label="radio.text"
+          :value="radio.value"
+          @change="changeTransactionType(radio.value)"
+        >
+        </v-radio>
+      </v-radio-group>
       <v-text-field
         class="textField"
         v-model="isin"
@@ -65,9 +79,19 @@ export default {
       portfolioID: null,
       portfolios: [],
       positions: [],
+      radioGroup: 1,
+      row: null,
+      type: 'buy',
+      radioItems: [
+        { text: 'Kauf', value: 'buy', key: '1' },
+        { text: 'Verkauf', value: 'sell', key: '2' },
+      ],
     }
   },
   methods: {
+    changeTransactionType(type) {
+      this.type = type
+    },
     closeCard: function () {
       this.$emit('close-positions')
     },
@@ -78,33 +102,41 @@ export default {
       return this.positions[lastPosition-1].id + 1
     },
     async createPosition() {
-        const newPositions = this.positions;
+      let modifier = 1.0
 
-        const createdPosition = {
-          isin: this.isin,
-          name: this.name,
-          quantity: parseFloat(this.qty),
-          price: parseFloat(this.price),
-          portfolioId: parseInt(this.portfolioID),
-          id: this.GetNewPositionID()
-        };
+      if (this.type === 'sell') {
+          modifier = -1.0
+      }
 
-        newPositions.push(createdPosition);
+      let qty = parseFloat(this.qty) * modifier
 
-        const addPositions = {
-          positions: newPositions
-        };
+      const newPositions = this.positions;
 
-        try {
-          const db = getFirestore(app);
-          await setDoc(doc(db, "positions", this.user), addPositions);
-        } catch (e) {
-          console.error("Error adding document: ", e);
-        }
+      const createdPosition = {
+        isin: this.isin,
+        name: this.name,
+        quantity: qty,
+        price: parseFloat(this.price),
+        portfolioId: parseInt(this.portfolioID),
+        id: this.GetNewPositionID()
+      };
 
-        await this.fetchPortfolios()
-        this.addPortfolio = false
-        this.closeCard()
+      newPositions.push(createdPosition);
+
+      const addPositions = {
+        positions: newPositions
+      };
+
+      try {
+        const db = getFirestore(app);
+        await setDoc(doc(db, "positions", this.user), addPositions);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
+
+      await this.fetchPortfolios()
+      this.addPortfolio = false
+      this.closeCard()
         // this.$emit('close-positions')
       // } else {
       //   console.log("LAK DU CHUND")
@@ -137,9 +169,10 @@ export default {
       }
     },
   },
-  beforeDestroy() {
-  },
-  beforeCreate() {
+  watch: {
+    type() {
+      console.log(this.type)
+    }
   },
   mounted() {
     this.portfolioID = localStorage.portfolioID
