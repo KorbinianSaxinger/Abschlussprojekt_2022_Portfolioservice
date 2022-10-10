@@ -1,8 +1,9 @@
 <template>
   <v-container>
     <v-card
-        v-if="portfoliotabs != ''"
-        class="d-flex justify-end" width="1205">
+        v-if="loading === false"
+        class="d-flex justify-end" width="1205"
+       >
       <v-tabs
           class="tabs"
       >
@@ -39,7 +40,7 @@
       </v-btn>
     </v-card>
     <div
-      v-if="portfoliotabs == ''"
+      v-if="loading === true"
     >
       <v-progress-circular
           class="loading"
@@ -88,8 +89,15 @@
         v-on:close-positions="closeAddPosition"
       >
       </create-position>
+      <delete-position
+        class="deletePosition"
+        v-if="deletePosition === true"
+        v-on:close-delete-positions="closeDeletePosition"
+        v-on:update-positions="updatePositions"
+      >
+      </delete-position>
       <v-data-table
-        v-if="addPosition !== true && addPortfolio !== true && positions.length > 0"
+        v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && positions.length > 0"
         class="v-data-table"
         :headers="headers"
         :items="positions"
@@ -98,7 +106,7 @@
       >
 
         <template v-slot:[`item.value`]="{ item }">
-          {{ item.price * item.quantity + ' €'}}
+          {{ item.price * item.quantity.toString().replace('-','') + ' €'}}
         </template>
 
         <template v-slot:[`item.price`]="{ item }">
@@ -107,7 +115,7 @@
 
         <template v-slot:[`item.action`]="{ item }">
           <v-icon
-            @click="deletePosition(item.id)"
+            @click="openDeletePosition(item.id, item.name)"
           >mdi-delete</v-icon>
         </template>
 
@@ -123,13 +131,16 @@ import { doc, getDoc } from "firebase/firestore";
 import app from "../../../firebase";
 import { getFirestore } from "firebase/firestore";
 import CreatePosition from "@/components/positions/createPosition";
+import deletePosition from "@/components/positions/deletePosition";
 
 export default {
   name: "portfolioTabs",
-  components: {CreatePosition},
+  components: {CreatePosition, deletePosition},
   data: () => ({
+    loading: true,
     addPortfolio: false,
     addPosition: false,
+    deletePosition: false,
     portfolioName: '',
     positions: [],
     user: '',
@@ -154,13 +165,19 @@ export default {
     closeAddPosition() {
       this.addPosition = false
     },
+    openDeletePosition(id, name) {
+      this.deletePosition = true
+      localStorage.positionID = id
+      localStorage.positionName = name
+      localStorage.positions = this.positions
+    },
+    closeDeletePosition() {
+      this.deletePosition = false
+    },
     openAddPortfolio() {
       this.addPortfolio = true
     },
 
-    deletePosition(id) {
-      console.log(id)
-    },
 
     idExists(id) {
       return this.portfoliotabs.filter(portfolio => portfolio.id === id).length > 0;
@@ -219,7 +236,10 @@ export default {
     safePortfolioID(portfolioID) {
       localStorage.portfolioID = portfolioID
     },
-
+    updatePositions() {
+      const portfolioID = localStorage.portfolioID
+      this.getPositions(portfolioID)
+    },
     async getPositions(id) {
 
       this.safePortfolioID(id)
@@ -245,10 +265,15 @@ export default {
         const JSONObject = JSON.parse(JSONString);
         this.portfoliotabs = JSONObject.portfolios;
       }
+      else {
+        this.portfoliotabs = ''
+      }
     },
   },
-
   watch: {
+    portfoliotabs() {
+      this.loading = false
+    },
     errMsg() {
       setTimeout(() => {
         this.errMsg = ''
