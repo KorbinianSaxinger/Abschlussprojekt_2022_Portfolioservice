@@ -48,15 +48,15 @@
       ></v-progress-circular>
     </div>
     <v-card
-        v-if="addPortfolio === true"
-        class="addcard"
-        rounded
+      v-if="addPortfolio === true"
+      class="addcard"
+      rounded
     >
       <v-card-title>
         Portfolio erstellen
         <v-icon
-            class="iconClose d-flex"
-            @click.prevent="closeCreatePortfolio"
+          class="iconClose d-flex"
+          @click.prevent="closeCreatePortfolio"
         >mdi-close
         </v-icon>
       </v-card-title>
@@ -67,7 +67,12 @@
         outlined
       >
       </v-text-field>
+      <div
+          class="error"
+          v-if="errMsg !== ''"
+      > {{ errMsg }} </div>
       <v-btn
+          v-if="errMsg === ''"
           type="submit"
           class="createButton d-inline-flex text-center"
           width="100"
@@ -130,6 +135,7 @@ export default {
     user: '',
     portfolio: '',
     portfoliotabs: [],
+    errMsg: '',
     headers: [
       {text: 'Name', value: 'name', align: 'left'},
       {text: 'ISIN', value: 'isin', align: 'left'},
@@ -161,7 +167,10 @@ export default {
     },
 
     PortfolioExists(name) {
-      return this.portfoliotabs.filter(portfolio => portfolio.name.toUpperCase() === name.toUpperCase()).length > 0;
+      if (this.portfoliotabs.filter(portfolio => portfolio.name.toUpperCase() === name.toUpperCase()).length > 0) {
+        return false
+      }
+      return true
     },
 
     GetNewPortfolioID() {
@@ -171,7 +180,7 @@ export default {
     },
 
     async createPortfolio() {
-      if(!this.PortfolioExists(this.portfolioName)) {
+      if(this.PortfolioExists(this.portfolioName) === true) {
         const userPortfolios = [];
         for (let i = 0; i < this.portfoliotabs.length; i++) {
           const portfolio =  this.portfoliotabs[i];
@@ -199,7 +208,7 @@ export default {
         await this.fetchPortfolios()
         this.addPortfolio = false
       } else {
-        // console.log("LAK DU CHUND")
+        this.errMsg = 'Dieses Portfolio existiert bereits'
       }
     },
 
@@ -226,7 +235,6 @@ export default {
       }
     },
 
-
     async fetchPortfolios() {
       const db = getFirestore(app);
       const docRef = doc(db, "portfolios", this.user);
@@ -239,17 +247,17 @@ export default {
       }
     },
   },
-  computed: {
 
-
-  },
   watch: {
+    errMsg() {
+      setTimeout(() => {
+        this.errMsg = ''
+      }, 3000)
+    },
     addPosition() {
       if(this.addPosition === false) {
-        // console.log(localStorage.portfolioID)
         this.getPositions(localStorage.portfolioID)
       }
-      console.log('positionChanged')
     }
   },
   mounted() {
@@ -266,6 +274,11 @@ export default {
 </script>
 
 <style scoped>
+.error {
+  padding-bottom: 40px;
+
+  color: red;
+}
 .loading {
   margin-top: 80px;
   color: red;
