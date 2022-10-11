@@ -152,7 +152,7 @@ export default {
       {text: 'ISIN', value: 'isin', align: 'left'},
       {text: 'Anzahl', value: 'quantity', align: 'left'},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
-      {text: 'Preis', value: 'price', align: 'left'},
+      {text: 'Stückpreis', value: 'price', align: 'left'},
       {text: 'Gesamtpreis', value: 'value', align: 'left'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
 
