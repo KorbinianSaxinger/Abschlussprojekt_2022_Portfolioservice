@@ -16,38 +16,7 @@
             {{ item.name }}
         </v-tab>
       </v-tabs>
-      <v-btn
-        type="submit"
-        class="button"
-        color="green"
-        dark
-        @click.prevent="openAddPortfolio"
-      >
-        <v-icon
-          style="color: green"
-        >mdi-plus</v-icon>
-      </v-btn>
-      <v-btn
-          type="submit"
-          class="addPositionBtn"
-          color="green"
-          dark
-          @click.prevent="openAddPosition"
-      >
-        <v-icon
-            style="color: red"
-        >mdi-plus</v-icon>
-      </v-btn>
     </v-card>
-    <div
-      v-if="loading === true"
-    >
-      <v-progress-circular
-          class="loading"
-          :size="50"
-          indeterminate
-      ></v-progress-circular>
-    </div>
     <v-card
       v-if="addPortfolio === true"
       class="addcard"
@@ -96,30 +65,64 @@
         v-on:update-positions="updatePositions"
       >
       </delete-position>
-      <v-data-table
-        v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && positions.length > 0"
-        class="v-data-table"
-        :headers="headers"
-        :items="positions"
-        must-sort
-        sort-desc
+      <v-card
+          class="tableCard"
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition != true"
       >
-
-        <template v-slot:[`item.value`]="{ item }">
-          {{ item.price * item.quantity.toString().replace('-','') + ' €'}}
-        </template>
-
-        <template v-slot:[`item.price`]="{ item }">
-          {{ item.price + ' €'}}
-        </template>
-
-        <template v-slot:[`item.action`]="{ item }">
+        <v-btn
+            type="submit"
+            class="button"
+            dark
+            @click.prevent="openAddPortfolio"
+        >
           <v-icon
-            @click="openDeletePosition(item.id, item.name)"
-          >mdi-delete</v-icon>
-        </template>
+              style="color: green"
+          >mdi-plus</v-icon>
+        </v-btn>
+        <v-btn
+            type="submit"
+            class="addPositionBtn"
+            dark
+            @click.prevent="openAddPosition"
+        >
+          <v-icon
+              style="color: red"
+          >mdi-plus</v-icon>
+        </v-btn>
+        <v-data-table
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && positions.length > 0"
+          class="v-data-table"
+          :headers="headers"
+          :items="positions"
+          must-sort
+          sort-desc
+        >
 
-      </v-data-table>
+          <template v-slot:[`item.value`]="{ item }">
+            {{ item.price * item.quantity.toString().replace('-','') + ' €'}}
+          </template>
+
+          <template v-slot:[`item.price`]="{ item }">
+            {{ item.price + ' €'}}
+          </template>
+
+          <template v-slot:[`item.action`]="{ item }">
+            <v-icon
+              @click="openDeletePosition(item.id, item.name)"
+            >mdi-delete</v-icon>
+          </template>
+
+        </v-data-table>
+      </v-card>
+      <div
+          v-if="loading === true"
+      >
+        <v-progress-circular
+            class="loading"
+            :size="50"
+            indeterminate
+        ></v-progress-circular>
+      </div>
     </div>
   </v-container>
 </template>
@@ -299,6 +302,9 @@ export default {
 </script>
 
 <style scoped>
+.tableCard {
+  margin-top: 10px;
+}
 .error {
   padding-bottom: 40px;
 
@@ -308,14 +314,14 @@ export default {
   margin-top: 80px;
   color: red;
 }
-.button {
-  position: absolute;
-  margin: 6px 0px 0px 1120px;
-}
-.addPositionBtn {
-  position: absolute;
-  margin: 6px 0px 0px 1200px;
-}
+/*.button {*/
+/*  position: absolute;*/
+/*  margin: 6px 0px 0px 1120px;*/
+/*}*/
+/*.addPositionBtn {*/
+/*  position: absolute;*/
+/*  margin: 6px 0px 0px 1200px;*/
+/*}*/
 .tabs {
   color: green;
   background-color: green;
