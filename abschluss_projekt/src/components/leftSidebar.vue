@@ -1,12 +1,12 @@
 <template>
-  <v-content>
+  <v-main>
     <v-card
       class="main flex-nowrap"
       rounded
     >
       <real-time-table/>
     </v-card>
-  </v-content>
+  </v-main>
 </template>
 
 <script>

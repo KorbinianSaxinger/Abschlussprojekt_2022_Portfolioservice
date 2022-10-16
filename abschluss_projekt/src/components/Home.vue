@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-main>
     <div
       class="leftSideBar"
     >
@@ -11,7 +11,7 @@
         <portfolio-tabs/>
       </div>
     </div>
-  </v-content>
+  </v-main>
 </template>
 
 <script>
