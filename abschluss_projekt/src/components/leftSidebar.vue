@@ -21,7 +21,6 @@ export default {
 .main {
   margin-top: 11px;
   width: 300px;
-  /*height: 700px;*/
   background-color: white;
 }
 </style>
