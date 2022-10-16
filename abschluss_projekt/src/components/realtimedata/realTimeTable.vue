@@ -8,8 +8,11 @@
      >
      </v-text-field>
        <v-icon
-        @click.prevent="searchStock()"
+        @click.prevent="searchStock"
        >mdi-magnify</v-icon>
+     <v-icon
+        @click.prevent="closeSearch"
+       >mdi-close</v-icon>
    </div>
 
    <v-data-table
@@ -29,14 +32,20 @@
 </template>
 
 <script>
+import {doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
+import app from "../../../firebase";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
+
 export default {
   name: "realTimeTable",
 
   data() {
     return {
+      user: '',
       currentSymbol: '',
       searchValue: '',
       searchResult: [],
+      positions: [],
       stockValues: {},
       headers: [
         {text: 'Name', value: '2. name'},
@@ -45,7 +54,31 @@ export default {
     }
   },
   methods: {
+    async getPositions(id) {
 
+      const db = getFirestore(app);
+      const docRef = doc(db, "watch", this.user);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const JSONString = JSON.stringify(docSnap.data());
+        const JSONObject = JSON.parse(JSONString);
+        console.log(JSONObject)
+        this.positions = JSONObject.watch.filter(position => position.portfolioId == id);
+      }
+    },
+
+    GetNewPositionID() {
+      const lastPosition = this.positions.length
+      if(lastPosition <= 0) return 0
+      // console.log(this.positions)
+      return this.positions[lastPosition-1].id + 1
+    },
+
+    closeSearch() {
+      this.searchResult = []
+      this.$emit('close-search-bar')
+    },
     getStockData(symbol) {
       const axios = require("axios");
       const that = this
@@ -76,14 +109,57 @@ export default {
       });
     },
 
-    add(item) {
+    async add(item) {
+      this.$emit('close-search-bar')
       let keys = Object.keys(item);
       let values = keys.map(function(key) {
         return item[key];
       });
       console.log(values[0]);
+      this.stockValues = null
       this.getStockData(values[0])
+
+      const newPositions = this.positions;
+      let name = ''
+      const portfolioID = localStorage.portfolioID
+      const currency = this.stockValues.currency
+      console.log(this.stockValues)
+
+      if (this.stockValues.longName.length > 0) {
+        name = this.stockValues.longName
+      }
+      else if (this.stockValues.shortName.length > 0) {
+        name = this.stockValues.shortName
+      }
+      const createdWatch = {
+        name: name,
+        portfolioID: portfolioID,
+        currency: currency,
+        id: this.GetNewPositionID(),
+      };
+
+      newPositions.push(createdWatch);
+
+      const addwatch = {
+        watch: newPositions
+      };
+
+      try {
+        const db = getFirestore(app);
+        await setDoc(doc(db, "watch", this.user), addwatch);
+      } catch (e) {
+        console.error("Error adding document: ", e);
+      }
+
+      // await this.fetchPortfolios()
+      // this.addPortfolio = false
+      // this.closeCard()
+      // this.$emit('close-positions')
+      // } else {
+      //   console.log("LAK DU CHUND")
+      // }
       this.searchResult = []
+      this.$emit('close-search-bar')
     },
 
     changeResult(object) {
@@ -107,6 +183,7 @@ export default {
     },
 
     searchStock(){
+      this.$emit('open-search-bar')
       const search = this.searchValue
       const axios = require("axios");
       const that = this;
@@ -133,7 +210,13 @@ export default {
     }
   },
   mounted() {
-
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        this.user = user.uid;
+      }
+    });
+    this.getPositions(localStorage.portfolioID)
   },
 
 }

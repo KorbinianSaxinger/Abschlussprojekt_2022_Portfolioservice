@@ -38,7 +38,7 @@
       >
       </delete-position>
       <v-card
-          class="tableCard"
+          class="tableCard d-flex-row"
           v-if="addPosition !== true && addPortfolio !== true && deletePosition != true"
       >
         <v-btn
@@ -61,8 +61,25 @@
               style="color: red"
           >mdi-plus</v-icon>
         </v-btn>
+        <v-tabs
+            class="tabs"
+        >
+          <v-tab
+              class="menueTabs"
+              v-for="item in menueTabs"
+              :key="item.value"
+              @click="changePositions(item.value)"
+          >
+            {{ item.text }}
+          </v-tab>
+        </v-tabs>
+        <real-time-table
+          class="justify-start"
+          v-on:open-search-bar="isSearch"
+          v-on:close-search-bar="isNotSearch"
+        />
         <v-data-table
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && positions.length > 0"
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
           class="v-data-table"
           :headers="headers"
           :items="positions"
@@ -96,6 +113,17 @@
           </template>
 
         </v-data-table>
+
+        <v-data-table
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && positions.length > 0"
+          class="v-data-table"
+          :headers="watchHeaders"
+          :items="watchers"
+          must-sort
+          sort-desc
+        >
+
+        </v-data-table>
       </v-card>
       <div
           v-if="loading === true"
@@ -118,19 +146,28 @@ import { getFirestore } from "firebase/firestore";
 import CreatePosition from "@/components/positions/createPosition";
 import deletePosition from "@/components/positions/deletePosition";
 import AddPortfolio from "@/components/portfolios/addPortfolio";
+import RealTimeTable from "@/components/realtimedata/realTimeTable";
 
 export default {
   name: "portfolioTabs",
-  components: {AddPortfolio, CreatePosition, deletePosition},
+  components: {RealTimeTable, AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
+    search: false,
     addPortfolio: false,
     addPosition: false,
     deletePosition: false,
+    transactionTable: false,
+    watchTable: false,
     portfolioName: '',
     positions: [],
+    watchers: [],
     user: '',
     portfoliotabs: [],
+    menueTabs: [
+      {text: 'Transaktionen', value: 'transactions'},
+      {text: 'Beobachten', value: 'watch'},
+    ],
     headers: [
       {text: 'Buy/Sell', value: 'bns', align: 'end'},
       {text: 'Name', value: 'name', align: 'left'},
@@ -141,9 +178,34 @@ export default {
       {text: 'Gesamtpreis', value: 'value', align: 'left'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
 
+    ],
+    watchHeaders: [
+      {text: 'Name', value: 'name', align: 'left'},
+      {text: 'Währung', value: 'currency', align: 'left'},
+      // {text: 'Kurs', value: 'currentPrice', align: 'left'},
+      {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
+
     ]
   }),
   methods: {
+    changePositions(position) {
+      if (position === 'transactions') {
+        this.transactionTable = true
+        this.watchTable = false
+        this.getPositions(localStorage.portfolioID)
+      }
+      if (position === 'watch') {
+        this.watchTable = true
+        this.transactionTable = false
+        this.getWatchers(localStorage.portfolioID)
+      }
+    },
+    isSearch() {
+      this.search = true
+    },
+    isNotSearch() {
+      this.search = false
+    },
     openAddPosition() {
       this.addPosition = true
     },
@@ -189,6 +251,25 @@ export default {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
         this.positions = JSONObject.positions.filter(position => position.portfolioId == id);
+      }
+    },
+
+    async getWatchers(id) {
+
+      this.safePortfolioID(id)
+
+      const db = getFirestore(app);
+      const docRef = doc(db, "watch", this.user);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const JSONString = JSON.stringify(docSnap.data());
+        const JSONObject = JSON.parse(JSONString);
+        console.log(JSONObject.watch)
+
+        this.watchers = JSONObject.watch;
+        // console.log(this.positions)
+
       }
     },
 
