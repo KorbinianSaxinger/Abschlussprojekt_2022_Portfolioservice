@@ -17,40 +17,12 @@
         </v-tab>
       </v-tabs>
     </v-card>
-    <v-card
+
+    <add-portfolio
       v-if="addPortfolio === true"
-      class="addcard"
-      rounded
-    >
-      <v-card-title>
-        Portfolio erstellen
-        <v-icon
-          class="iconClose d-flex"
-          @click.prevent="closeCreatePortfolio"
-        >mdi-close
-        </v-icon>
-      </v-card-title>
-      <v-text-field
-        class="text-field d-flex"
-        label="Portfolio Name"
-        v-model="portfolioName"
-        outlined
-      >
-      </v-text-field>
-      <div
-          class="error"
-          v-if="errMsg !== ''"
-      > {{ errMsg }} </div>
-      <v-btn
-          v-if="errMsg === ''"
-          type="submit"
-          class="createButton d-inline-flex text-center"
-          width="100"
-          @click.prevent="createPortfolio"
-      >
-        Erstellen
-      </v-btn>
-    </v-card>
+      v-on:close-add-portfolio="closeCreatePortfolio  "
+    ></add-portfolio>
+
     <div>
       <create-position
         class="addPosition"
@@ -112,6 +84,17 @@
             >mdi-delete</v-icon>
           </template>
 
+          <template v-slot:[`item.bns`]="{ item }">
+            <v-icon
+                v-if="item.quantity < 0"
+                class="sellIcon"
+            >mdi-arrow-down-bold</v-icon>
+            <v-icon
+                v-if="item.quantity > 0"
+                class="buyIcon"
+            >mdi-arrow-up-bold</v-icon>
+          </template>
+
         </v-data-table>
       </v-card>
       <div
@@ -129,16 +112,16 @@
 
 <script>
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { setDoc  } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import app from "../../../firebase";
 import { getFirestore } from "firebase/firestore";
 import CreatePosition from "@/components/positions/createPosition";
 import deletePosition from "@/components/positions/deletePosition";
+import AddPortfolio from "@/components/portfolios/addPortfolio";
 
 export default {
   name: "portfolioTabs",
-  components: {CreatePosition, deletePosition},
+  components: {AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
     addPortfolio: false,
@@ -147,10 +130,9 @@ export default {
     portfolioName: '',
     positions: [],
     user: '',
-    portfolio: '',
     portfoliotabs: [],
-    errMsg: '',
     headers: [
+      {text: 'Buy/Sell', value: 'bns', align: 'end'},
       {text: 'Name', value: 'name', align: 'left'},
       {text: 'ISIN', value: 'isin', align: 'left'},
       {text: 'Anzahl', value: 'quantity', align: 'left'},
@@ -181,68 +163,20 @@ export default {
       this.addPortfolio = true
     },
 
-
-    idExists(id) {
-      return this.portfoliotabs.filter(portfolio => portfolio.id === id).length > 0;
-    },
-
-    PortfolioExists(name) {
-      if (this.portfoliotabs.filter(portfolio => portfolio.name.toUpperCase() === name.toUpperCase()).length > 0) {
-        return false
-      }
-      return true
-    },
-
-    GetNewPortfolioID() {
-      const portfolios = this.portfoliotabs.length
-      if(portfolios < 1) return 0
-      return this.portfoliotabs[portfolios-1].id + 1
-    },
-
-    async createPortfolio() {
-      if(this.PortfolioExists(this.portfolioName) === true) {
-        const userPortfolios = [];
-        for (let i = 0; i < this.portfoliotabs.length; i++) {
-          const portfolio =  this.portfoliotabs[i];
-          userPortfolios.push(portfolio);
-        }
-
-        const createdPortfolio = {
-          name: this.portfolioName,
-          id: this.GetNewPortfolioID()
-        };
-
-        userPortfolios.push(createdPortfolio);
-
-        const portfolio = {
-          portfolios: userPortfolios
-        };
-
-        try {
-          const db = getFirestore(app);
-          await setDoc(doc(db, "portfolios", this.user), portfolio);
-        } catch (e) {
-          console.error("Error adding document: ", e);
-        }
-
-        await this.fetchPortfolios()
-        this.addPortfolio = false
-      } else {
-        this.errMsg = 'Dieses Portfolio existiert bereits'
-      }
-    },
-
     closeCreatePortfolio() {
       this.addPortfolio = false
+      this.fetchPortfolios()
     },
 
     safePortfolioID(portfolioID) {
       localStorage.portfolioID = portfolioID
     },
+
     updatePositions() {
       const portfolioID = localStorage.portfolioID
       this.getPositions(portfolioID)
     },
+
     async getPositions(id) {
 
       this.safePortfolioID(id)
@@ -277,17 +211,14 @@ export default {
     portfoliotabs() {
       this.loading = false
     },
-    errMsg() {
-      setTimeout(() => {
-        this.errMsg = ''
-      }, 3000)
-    },
+
     addPosition() {
       if(this.addPosition === false) {
         this.getPositions(localStorage.portfolioID)
       }
     }
   },
+
   mounted() {
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
@@ -302,26 +233,21 @@ export default {
 </script>
 
 <style scoped>
+.sellIcon {
+  color: red;
+}
+.buyIcon {
+  color: green;
+}
 .tableCard {
   margin-top: 10px;
 }
-.error {
-  padding-bottom: 40px;
 
-  color: red;
-}
 .loading {
   margin-top: 80px;
   color: red;
 }
-/*.button {*/
-/*  position: absolute;*/
-/*  margin: 6px 0px 0px 1120px;*/
-/*}*/
-/*.addPositionBtn {*/
-/*  position: absolute;*/
-/*  margin: 6px 0px 0px 1200px;*/
-/*}*/
+
 .tabs {
   color: green;
   background-color: green;
@@ -336,21 +262,5 @@ export default {
   height: 200px;
   border-color: black;
   border-radius: 10px
-}
-.addcard {
-  margin: 10px 0% 0px 35%;
-  width: 300px;
-  height: 200px;
-  border-color: black;
-  border-radius: 10px
-}
-.iconClose {
-  margin-left: 80px;
-  color: green;
-}
-.text-field {
-  margin-left: 50px;
-  width: 200px;
-  justify-content: center;
 }
 </style>
