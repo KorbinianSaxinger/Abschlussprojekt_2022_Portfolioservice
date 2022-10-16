@@ -1,21 +1,28 @@
 <template>
-  <div class="home">
-    <div v-if="user != ''"
+  <v-content>
+    <div
+      class="leftSideBar"
     >
-      <portfolio-tabs/>
+      <left-sidebar/>
     </div>
-  </div>
+    <div class="home">
+      <div v-if="user != ''"
+      >
+        <portfolio-tabs/>
+      </div>
+    </div>
+  </v-content>
 </template>
 
 <script>
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../firebase";
-// import PLogin from "@/components/auth/login";
 import PortfolioTabs from "@/components/portfolios/portfolioTabs";
-// const axios = require('axios')
+import LeftSidebar from "@/components/leftSidebar";
+
 export default {
   name: "PHome",
-  components: {PortfolioTabs},
+  components: {LeftSidebar, PortfolioTabs},
   data() {
     return {
       user: '',
@@ -49,7 +56,9 @@ export default {
 }
 </script>
 <style scoped>
-
+.leftSideBar {
+  position: absolute;
+}
 .home {
     background: url("../assets/backgroundMD.jpg") no-repeat fixed;
     -webkit-background-size: cover;
