@@ -133,7 +133,7 @@
         >
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
-              :key="item"
+              @click.prevent="createPosition(item.symbol)"
             >mdi-cart-outline</v-icon>
           </template>
 
@@ -215,6 +215,9 @@ export default {
         this.transactionTable = false
         this.getWatchers(localStorage.portfolioID)
       }
+    },
+    createPosition(symbol) {
+      console.log(symbol)
     },
     isSearch() {
       this.search = true

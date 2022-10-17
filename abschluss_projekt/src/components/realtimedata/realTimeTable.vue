@@ -5,14 +5,18 @@
    >
      <v-text-field
          v-model="searchValue"
+         label="Suche"
          @focus="getWatchers()"
      >
      </v-text-field>
        <v-icon
         @click.prevent="searchStock"
+        class="searchIcon"
+        size="20"
        >mdi-magnify</v-icon>
      <v-icon
         @click.prevent="closeSearch"
+        class="searchIcon"
        >mdi-close</v-icon>
    </div>
    <div
@@ -308,5 +312,11 @@ export default {
 .alert {
   /*margin-left: 50px;*/
   color: red;
+}
+.searchIcon {
+  margin-top: 25px;
+  margin-left: 5px;
+  height: 20px;
+  width: 20px;
 }
 </style>
