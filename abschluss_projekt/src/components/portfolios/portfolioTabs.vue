@@ -125,11 +125,13 @@
 
         <v-data-table
           v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchers.length > 0"
-          class="v-data-table"
+          class="v-data-table elevation-1"
           :headers="watchHeaders"
           :items="watchers"
           must-sort
           sort-desc
+          :items-per-page="10"
+
         >
           <template v-slot:[`item.action`]="{ item }">
             <v-icon

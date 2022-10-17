@@ -187,7 +187,7 @@ export default {
 
         if (name === '') {
           this.closeSearch()
-          return this.alert = 'Zur zeit leider nicht supported'
+          return this.alert = 'Zeitüberschreitung bei der Datenabfrage'
         }
 
         const createdWatch = {
