@@ -85,7 +85,7 @@ export default {
         const JSONObject = JSON.parse(JSONString);
         // console.log(JSONObject.watch)
 
-        this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
+        this.watchers = JSONObject.watch;
         // console.log(this.watchers)
 
       } else {
@@ -212,7 +212,7 @@ export default {
         // this.searchResult = []
         this.getWatchers()
         this.closeSearch()
-      }, 5000)
+      }, 4000)
 
 
       // await this.fetchPortfolios()
