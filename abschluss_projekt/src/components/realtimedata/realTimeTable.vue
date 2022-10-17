@@ -5,6 +5,7 @@
    >
      <v-text-field
          v-model="searchValue"
+         @focus="getWatchers()"
      >
      </v-text-field>
        <v-icon
@@ -42,19 +43,31 @@ export default {
   data() {
     return {
       user: '',
-      currentSymbol: '',
+      positionName: '',
+      positionCurrency: '',
+      positionSymbol: '',
+      currenPrice: null,
+
       searchValue: '',
       searchResult: [],
       positions: [],
+      watchers: [],
       stockValues: {},
       headers: [
         {text: 'Name', value: '2. name'},
+        {text: 'Symbol', value: '1. symbol'},
         {text: 'add', value: 'add', sortable: false},
       ]
     }
   },
   methods: {
-    async getPositions(id) {
+    safePortfolioID(portfolioID) {
+      localStorage.portfolioID = portfolioID
+    },
+    async getWatchers() {
+      let id = localStorage.portfolioID
+
+      this.safePortfolioID(id)
 
       const db = getFirestore(app);
       const docRef = doc(db, "watch", this.user);
@@ -63,16 +76,33 @@ export default {
       if (docSnap.exists()) {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
-        console.log(JSONObject)
-        this.positions = JSONObject.watch.filter(position => position.portfolioId == id);
+        // console.log(JSONObject.watch)
+
+        this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
+        // console.log(this.watchers)
+
       }
     },
 
+    // async getPositions() {
+    //   const id = localStorage.portfolioID
+    //   console.log(id)
+    //   const db = getFirestore(app);
+    //   const docRef = doc(db, "watch", this.user);
+    //   const docSnap = await getDoc(docRef);
+    //
+    //   if (docSnap.exists()) {
+    //     const JSONString = JSON.stringify(docSnap.data());
+    //     const JSONObject = JSON.parse(JSONString);
+    //     this.positions = JSONObject.watch.filter(position => position.portfolioId == id);
+    //   }
+    // },
+
     GetNewPositionID() {
-      const lastPosition = this.positions.length
+      const lastPosition = this.watchers.length
       if(lastPosition <= 0) return 0
       // console.log(this.positions)
-      return this.positions[lastPosition-1].id + 1
+      return this.watchers[lastPosition-1].id + 1
     },
 
     closeSearch() {
@@ -80,6 +110,7 @@ export default {
       this.$emit('close-search-bar')
     },
     getStockData(symbol) {
+      // this.stockValues = {}
       const axios = require("axios");
       const that = this
 
@@ -101,7 +132,7 @@ export default {
       axios.request(options).then(function (response) {
         const JSONString = JSON.stringify(response.data);
         const JSONObject = JSON.parse(JSONString);
-        console.log(response.data)
+        // console.log("Response",response.data)
         that.changeStockValues(JSONObject.data)
 
       }).catch(function (error) {
@@ -115,41 +146,48 @@ export default {
       let values = keys.map(function(key) {
         return item[key];
       });
+
       console.log(values[0]);
-      this.stockValues = null
       this.getStockData(values[0])
+      const newPositions = this.watchers;
+      console.log(newPositions)
+      setTimeout(() => {
+        console.log(this.positionName)
+        console.log(this.positionSymbol)
+        console.log(this.positionCurrency)
+        console.log(this.currenPrice)
 
-      const newPositions = this.positions;
-      let name = ''
-      const portfolioID = localStorage.portfolioID
-      const currency = this.stockValues.currency
-      console.log(this.stockValues)
 
-      if (this.stockValues.longName.length > 0) {
-        name = this.stockValues.longName
-      }
-      else if (this.stockValues.shortName.length > 0) {
-        name = this.stockValues.shortName
-      }
-      const createdWatch = {
-        name: name,
-        portfolioID: portfolioID,
-        currency: currency,
-        id: this.GetNewPositionID(),
-      };
 
-      newPositions.push(createdWatch);
+        const name = this.positionName
+        const portfolioID = localStorage.portfolioID
+        const currency = this.positionCurrency
+        const symbol = this.positionSymbol
+        const price = this.currenPrice
 
-      const addwatch = {
-        watch: newPositions
-      };
+        const createdWatch = {
+          name: name,
+          portfolioID: portfolioID,
+          currency: currency,
+          symbol: symbol,
+          currentPrice: price,
+          id: this.GetNewPositionID(),
+        };
 
-      try {
-        const db = getFirestore(app);
-        await setDoc(doc(db, "watch", this.user), addwatch);
-      } catch (e) {
-        console.error("Error adding document: ", e);
-      }
+        newPositions.push(createdWatch);
+
+        const addwatch = {
+          watch: newPositions
+        };
+
+        try {
+          const db = getFirestore(app);
+          setDoc(doc(db, "watch", this.user), addwatch);
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
+      }, 4000)
+
 
       // await this.fetchPortfolios()
       // this.addPortfolio = false
@@ -158,27 +196,43 @@ export default {
       // } else {
       //   console.log("LAK DU CHUND")
       // }
+      this.positionName = ''
+      this.positionSymbol = ''
+      this.positionCurrency = ''
+      this.currenPrice = null
+      this.searchValue = ''
       this.searchResult = []
       this.$emit('close-search-bar')
     },
 
     changeResult(object) {
       for (let i = 0; i < object.bestMatches.length; i++) {
+        console.log(object.bestMatches[i])
         this.searchResult.push(object.bestMatches[i])
       }
     },
 
     changeStockValues(data) {
-      this.stockValues = data
-      if (this.stockValues.longName) {
-        console.log(this.stockValues.longName)
+
+      if (data.longName) {
+        // console.log(data.longName)
+        this.positionName = data.longName
       }
-      else if (this.stockValues.shortName) {
-        console.log(this.stockValues.shortName)
+      else if (data.shortName) {
+        // console.log(data.shortName)
+        this.positionName = data.shortName
       } else {
         console.log('Kein Name')
       }
-      console.log(this.stockValues.currentPrice)
+      if (data.currency) {
+        this.positionCurrency = data.currency
+      }
+      if (data.currentPrice) {
+        this.currenPrice = data.currentPrice
+      }
+      if (data.symbol) {
+        this.positionSymbol = data.symbol
+      }
 
     },
 
@@ -216,7 +270,7 @@ export default {
         this.user = user.uid;
       }
     });
-    this.getPositions(localStorage.portfolioID)
+    this.getWatchers(localStorage.portfolioID)
   },
 
 }

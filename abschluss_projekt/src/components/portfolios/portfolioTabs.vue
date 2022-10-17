@@ -115,7 +115,7 @@
         </v-data-table>
 
         <v-data-table
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && positions.length > 0"
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchers.length > 0"
           class="v-data-table"
           :headers="watchHeaders"
           :items="watchers"
@@ -182,7 +182,8 @@ export default {
     watchHeaders: [
       {text: 'Name', value: 'name', align: 'left'},
       {text: 'Währung', value: 'currency', align: 'left'},
-      // {text: 'Kurs', value: 'currentPrice', align: 'left'},
+      {text: 'Symbol', value: 'symbol', align: 'left'},
+      {text: 'Price', value: 'currentPrice', align: 'left'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
 
     ]
@@ -204,7 +205,9 @@ export default {
       this.search = true
     },
     isNotSearch() {
+      this.getWatchers(localStorage.portfolioID)   
       this.search = false
+
     },
     openAddPosition() {
       this.addPosition = true
@@ -265,10 +268,10 @@ export default {
       if (docSnap.exists()) {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
-        console.log(JSONObject.watch)
+        // console.log(JSONObject.watch)
 
-        this.watchers = JSONObject.watch;
-        // console.log(this.positions)
+        this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
+        // console.log(this.watchers)
 
       }
     },
