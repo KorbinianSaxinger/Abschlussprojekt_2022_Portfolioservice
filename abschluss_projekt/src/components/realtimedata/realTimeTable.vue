@@ -15,7 +15,13 @@
         @click.prevent="closeSearch"
        >mdi-close</v-icon>
    </div>
-
+   <div
+       v-if="alert !== ''"
+       class="alert"
+   >
+     <br>
+     {{ alert }}
+   </div>
    <v-data-table
      v-if="searchResult.length > 0"
      :headers="headers"
@@ -47,12 +53,13 @@ export default {
       positionCurrency: '',
       positionSymbol: '',
       currenPrice: null,
-
+      alert: '',
       searchValue: '',
       searchResult: [],
       positions: [],
       watchers: [],
       stockValues: {},
+      break: false,
       headers: [
         {text: 'Name', value: '2. name'},
         {text: 'Symbol', value: '1. symbol'},
@@ -81,6 +88,8 @@ export default {
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
         // console.log(this.watchers)
 
+      } else {
+        // this.alert = 'Keine Beobachteten Positionen'
       }
     },
 
@@ -110,6 +119,8 @@ export default {
       this.$emit('close-search-bar')
     },
     getStockData(symbol) {
+      let date = new Date()
+      console.log(date)
       // this.stockValues = {}
       const axios = require("axios");
       const that = this
@@ -138,10 +149,11 @@ export default {
       }).catch(function (error) {
         console.error(error);
       });
+
     },
 
     async add(item) {
-      this.$emit('close-search-bar')
+
       let keys = Object.keys(item);
       let values = keys.map(function(key) {
         return item[key];
@@ -151,19 +163,28 @@ export default {
       this.getStockData(values[0])
       const newPositions = this.watchers;
       console.log(newPositions)
+
       setTimeout(() => {
         console.log(this.positionName)
         console.log(this.positionSymbol)
-        console.log(this.positionCurrency)
-        console.log(this.currenPrice)
-
-
+        // console.log(this.positionCurrency)
+        // console.log(this.currenPrice)
 
         const name = this.positionName
         const portfolioID = localStorage.portfolioID
         const currency = this.positionCurrency
         const symbol = this.positionSymbol
         const price = this.currenPrice
+
+        this.positionName = ''
+        this.positionSymbol = ''
+        this.positionCurrency = ''
+        this.currenPrice = null
+
+        if (name === '') {
+          this.closeSearch()
+          return this.alert = 'Zur zeit leider nicht supported'
+        }
 
         const createdWatch = {
           name: name,
@@ -186,7 +207,12 @@ export default {
         } catch (e) {
           console.error("Error adding document: ", e);
         }
-      }, 4000)
+
+        // this.searchValue = ''
+        // this.searchResult = []
+        this.getWatchers()
+        this.closeSearch()
+      }, 5000)
 
 
       // await this.fetchPortfolios()
@@ -196,13 +222,8 @@ export default {
       // } else {
       //   console.log("LAK DU CHUND")
       // }
-      this.positionName = ''
-      this.positionSymbol = ''
-      this.positionCurrency = ''
-      this.currenPrice = null
-      this.searchValue = ''
-      this.searchResult = []
-      this.$emit('close-search-bar')
+
+      // this.$emit('get-new-watchers')
     },
 
     changeResult(object) {
@@ -221,8 +242,6 @@ export default {
       else if (data.shortName) {
         // console.log(data.shortName)
         this.positionName = data.shortName
-      } else {
-        console.log('Kein Name')
       }
       if (data.currency) {
         this.positionCurrency = data.currency
@@ -234,6 +253,8 @@ export default {
         this.positionSymbol = data.symbol
       }
 
+      let date2 = new Date()
+      console.log(date2)
     },
 
     searchStock(){
@@ -270,12 +291,22 @@ export default {
         this.user = user.uid;
       }
     });
-    this.getWatchers(localStorage.portfolioID)
+    this.getWatchers()
+  },
+  watch: {
+    alert() {
+      setTimeout(() => {
+        this.alert = ''
+      }, 3000)
+    },
   },
 
 }
 </script>
 
 <style scoped>
-
+.alert {
+  /*margin-left: 50px;*/
+  color: red;
+}
 </style>

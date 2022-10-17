@@ -11,7 +11,7 @@
           class="testCard"
           v-for="item in portfoliotabs"
           :key="item.id"
-            @click="getPositions(item.id)"
+            @click="getTableData(item.id)"
         >
             {{ item.name }}
         </v-tab>
@@ -241,7 +241,10 @@ export default {
       const portfolioID = localStorage.portfolioID
       this.getPositions(portfolioID)
     },
-
+    getTableData(id) {
+      this.getPositions(id)
+      this.getWatchers(id)
+    },
     async getPositions(id) {
 
       this.safePortfolioID(id)
