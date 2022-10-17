@@ -22,14 +22,15 @@
       v-if="addPortfolio === true"
       v-on:close-add-portfolio="closeCreatePortfolio  "
     ></add-portfolio>
-
     <div>
+
       <create-position
         class="addPosition"
         v-if="addPosition === true"
         v-on:close-positions="closeAddPosition"
       >
       </create-position>
+
       <delete-position
         class="deletePosition"
         v-if="deletePosition === true"
@@ -37,19 +38,25 @@
         v-on:update-positions="updatePositions"
       >
       </delete-position>
+
       <v-card
           class="tableCard d-flex-row"
           v-if="addPosition !== true && addPortfolio !== true && deletePosition != true"
       >
+
         <v-btn
             type="submit"
             class="button"
             dark
             @click.prevent="openAddPortfolio"
         >
+
           <v-icon
-              style="color: green"
-          >mdi-plus</v-icon>
+            style="color: green"
+          >
+            mdi-plus
+          </v-icon>
+
         </v-btn>
         <v-btn
             type="submit"
@@ -73,11 +80,13 @@
             {{ item.text }}
           </v-tab>
         </v-tabs>
+
         <real-time-table
           class="justify-start"
           v-on:open-search-bar="isSearch"
           v-on:close-search-bar="isNotSearch"
         />
+
         <v-data-table
           v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
           class="v-data-table"
@@ -122,9 +131,15 @@
           must-sort
           sort-desc
         >
+          <template v-slot:[`item.action`]="{ item }">
+            <v-icon
+              :key="item"
+            >mdi-cart-outline</v-icon>
+          </template>
 
         </v-data-table>
       </v-card>
+
       <div
           v-if="loading === true"
       >
