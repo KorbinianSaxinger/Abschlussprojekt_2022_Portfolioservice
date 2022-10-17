@@ -1,19 +1,19 @@
 <template>
-  <v-content>
+  <v-main>
     <v-card
       class="main flex-nowrap"
       rounded
     >
-      <real-time-table/>
+<!--      <real-time-table/>-->
     </v-card>
-  </v-content>
+  </v-main>
 </template>
 
 <script>
-import RealTimeTable from "@/components/realtimedata/realTimeTable";
+// import RealTimeTable from "@/components/realtimedata/realTimeTable";
 export default {
   name: "leftSidebar",
-  components: {RealTimeTable}
+  // components: {RealTimeTable}
 }
 </script>
 
@@ -21,7 +21,6 @@ export default {
 .main {
   margin-top: 11px;
   width: 300px;
-  /*height: 700px;*/
   background-color: white;
 }
 </style>
