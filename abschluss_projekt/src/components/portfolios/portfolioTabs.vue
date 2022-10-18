@@ -136,7 +136,7 @@
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
               v-if="item.currentPrice > 0"
-              @click.prevent="createPosition(item.symbol)"
+              @click.prevent="getPrice(item.symbol)"
             >mdi-cart-outline</v-icon>
           </template>
 
@@ -219,8 +219,40 @@ export default {
         this.getWatchers(localStorage.portfolioID)
       }
     },
-    createPosition(symbol) {
-      console.log(symbol)
+    getPrice(symbol) {
+      const finnhub = require('finnhub');
+
+      const api_key = finnhub.ApiClient.instance.authentications['api_key'];
+      api_key.apiKey = "cd76caaad3i47lmpnibgcd76caaad3i47lmpnic0"
+      const finnhubClient = new finnhub.DefaultApi()
+
+      finnhubClient.quote(symbol, (error, data, response) => {
+        console.log(response)
+        console.log(data)
+      });
+    },
+    fetchPrices(symbol) {
+      const socket = new WebSocket('wss://ws.finnhub.io?token=cd76caaad3i47lmpnibgcd76caaad3i47lmpnic0');
+
+// Connection opened -> Subscribe
+      socket.addEventListener('open', function () {
+        socket.send(JSON.stringify({'type':'subscribe', 'symbol': symbol}))
+
+      });
+
+// Listen for messages
+      socket.addEventListener('message', function (event) {
+        // const JSONString = JSON.stringify(event.data);
+        const JSONObject = JSON.parse(event.data);
+        // console.log(JSONObject.data[0].p);
+        return JSONObject.data[0].p
+      });
+
+// Unsubscribe
+//       var unsubscribe = function(symbol) {
+//         socket.send(JSON.stringify({'type':'unsubscribe','symbol': symbol}))
+//       }
+
     },
     isSearch() {
       this.search = true
