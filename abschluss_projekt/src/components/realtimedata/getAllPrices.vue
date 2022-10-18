@@ -22,6 +22,8 @@ export default {
   },
   methods: {
     getPrices() {
+      let now = new Date()
+      console.log(now)
       const axios = require("axios");
 
       const options = {
@@ -47,7 +49,9 @@ export default {
 
         try {
           const db = getFirestore(app);
-          await setDoc(doc(db, "allPrices", "kjsnckansxaÖ123"), allPrices);
+          await setDoc(doc(db, "allPrices", "allPrices"), allPrices);
+          let now2 = new Date()
+          console.log(now2)
         } catch (e) {
           console.error("Error adding document: ", e);
         }
