@@ -13,7 +13,7 @@
         <v-text-field
             label="E-Mail"
             outlined
-            type="text"
+            type="email"
             id="iEmail"
             placeholder=" Email"
             v-model="email"
@@ -21,7 +21,7 @@
         <v-text-field
             label="Passwort"
             outlined
-            type="text"
+            type="password"
             id="iPasswort"
             placeholder=" Passwort"
             v-model="passwort"
