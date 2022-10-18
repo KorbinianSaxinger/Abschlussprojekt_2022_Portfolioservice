@@ -135,6 +135,7 @@
         >
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
+              v-if="item.currentPrice > 0"
               @click.prevent="createPosition(item.symbol)"
             >mdi-cart-outline</v-icon>
           </template>

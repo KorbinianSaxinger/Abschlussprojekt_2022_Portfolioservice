@@ -65,9 +65,10 @@ export default {
       stockValues: {},
       break: false,
       headers: [
-        {text: 'Name', value: '2. name'},
-        {text: 'Symbol', value: '1. symbol'},
-        {text: 'add', value: 'add', sortable: false},
+        {text: 'Name', value: '2. name', align: 'center'},
+        {text: 'Symbol', value: '1. symbol', align: 'center'},
+        {text: 'Wert', value: 'value', align: 'center'},
+        {text: 'add', value: 'add', sortable: false, align: 'center'},
       ]
     }
   },
@@ -184,6 +185,8 @@ export default {
         this.positionSymbol = ''
         this.positionCurrency = ''
         this.currenPrice = null
+        // this.searchValue = ''
+        // this.searchResult = []
 
         if (name === '') {
           this.closeSearch()
@@ -212,8 +215,7 @@ export default {
           console.error("Error adding document: ", e);
         }
 
-        // this.searchValue = ''
-        // this.searchResult = []
+
         this.getWatchers()
         this.closeSearch()
       }, 4000)
