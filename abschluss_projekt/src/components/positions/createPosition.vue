@@ -113,7 +113,9 @@ export default {
     },
     GetNewPositionID() {
       const lastPosition = this.positions.length
-      if(lastPosition <= 0) return 0
+      if(lastPosition === 0) {
+        return 0
+      }
       // console.log(this.positions)
       return this.positions[lastPosition-1].id + 1
     },
