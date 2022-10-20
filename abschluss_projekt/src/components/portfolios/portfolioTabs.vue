@@ -80,7 +80,9 @@
             {{ item.text }}
           </v-tab>
         </v-tabs>
-
+        <v-btn
+          @click="getPrice"
+        >Update Prices</v-btn>
         <real-time-table
           class="justify-start"
           v-on:open-search-bar="isSearch"
@@ -101,7 +103,7 @@
           </template>
 
           <template v-slot:[`item.price`]="{ item }">
-            {{ item.price + ' €'}}
+            {{ item.price }}
           </template>
 
           <template v-slot:[`item.action`]="{ item }">
@@ -135,9 +137,11 @@
         >
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
-              v-if="item.currentPrice > 0"
-              @click.prevent="createPosition(item.symbol)"
+              @click.prevent="createPosition(item.symbol, item.name, item.currency, item.currentPrice)"
             >mdi-cart-outline</v-icon>
+          </template>
+          <template v-slot:[`item.currentPrice`]="{ item }">
+          {{ item.currentPrice }}
           </template>
 
         </v-data-table>
@@ -158,13 +162,14 @@
 
 <script>
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import {doc, getDoc, setDoc} from "firebase/firestore";
 import app from "../../../firebase";
 import { getFirestore } from "firebase/firestore";
 import CreatePosition from "@/components/positions/createPosition";
 import deletePosition from "@/components/positions/deletePosition";
 import AddPortfolio from "@/components/portfolios/addPortfolio";
 import RealTimeTable from "@/components/realtimedata/realTimeTable";
+// import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
@@ -180,6 +185,8 @@ export default {
     portfolioName: '',
     positions: [],
     watchers: [],
+    allWatchers: [],
+    newWatchers: [],
     user: '',
     portfoliotabs: [],
     menueTabs: [
@@ -189,7 +196,7 @@ export default {
     headers: [
       {text: 'Buy/Sell', value: 'bns', align: 'end'},
       {text: 'Name', value: 'name', align: 'left'},
-      {text: 'ISIN', value: 'isin', align: 'left'},
+      {text: 'Symbol', value: 'symbol', align: 'left'},
       {text: 'Anzahl', value: 'quantity', align: 'left'},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
       {text: 'Stückpreis', value: 'price', align: 'left'},
@@ -217,11 +224,64 @@ export default {
         this.watchTable = true
         this.transactionTable = false
         this.getWatchers(localStorage.portfolioID)
+        // this.getPrice()
       }
     },
-    createPosition(symbol) {
-      console.log(symbol)
+    createPosition(symbol, name, currency, currentPrice) {
+      localStorage.symbol = symbol
+      localStorage.transactionName = name
+      localStorage.currency = currency
+      localStorage.currentPrice = currentPrice
+      this.addPosition = true
     },
+    getPrice()
+    {
+      this.newWatchers = []
+
+      const finnhub = require('finnhub');
+      const api_key = finnhub.ApiClient.instance.authentications['api_key'];
+      api_key.apiKey = "cd76caaad3i47lmpnibgcd76caaad3i47lmpnic0"
+      const finnhubClient = new finnhub.DefaultApi()
+
+      for (let i = 0; i < this.allWatchers.length; i++) {
+
+          let symbol = this.allWatchers[i].symbol
+
+          finnhubClient.quote(symbol, (error, data, response) => {
+            if (error){
+              console.log(error)
+              console.log(response)
+            }
+
+            let update = {
+              currency: this.allWatchers[i].currency,
+              currentPrice: data.c,
+              name: this.allWatchers[i].name,
+              portfolioID: this.allWatchers[i].portfolioID,
+              symbol: this.allWatchers[i].symbol,
+            }
+
+            this.newWatchers.push(update)
+
+            const newPrice = {
+              watch: this.newWatchers
+            }
+
+            console.log(this.newWatchers)
+            try {
+              const db = getFirestore(app);
+              setDoc(doc(db, "watch", this.user), newPrice);
+            } catch (e) {
+              console.error("Error adding document: ", e);
+            }
+          // console.log('new ', this.newWatchers)
+
+          });
+      }
+
+    },
+
+
     isSearch() {
       this.search = true
     },
@@ -234,6 +294,9 @@ export default {
       this.addPosition = true
     },
     closeAddPosition() {
+      this.getPositions(localStorage.portfolioID)
+      this.transactionTable = true
+      this.watchTable = false
       this.addPosition = false
     },
     openDeletePosition(id, name) {
@@ -293,7 +356,7 @@ export default {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
         // console.log(JSONObject.watch)
-
+        this.allWatchers = JSONObject.watch
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
         // console.log(this.watchers)
 
@@ -316,6 +379,10 @@ export default {
     },
   },
   watch: {
+    // watchers() {
+    //   console.log(this.watchers)
+    //   this.getPrice()
+    // },
     portfoliotabs() {
       this.loading = false
     },
@@ -328,6 +395,7 @@ export default {
   },
 
   mounted() {
+    // this.getPrice()
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
       if (user) {

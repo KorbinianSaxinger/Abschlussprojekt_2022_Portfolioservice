@@ -67,7 +67,8 @@ export default {
           .then((userCredential) => {
             // Signed in
             const user = userCredential.user;
-            console.log(user)
+            this.user = user
+            // console.log(user)
             // ...
           })
           .catch((error) => {
@@ -85,12 +86,13 @@ export default {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(user)
+        // console.log(user)
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
-        this.user = user.email;
+
         const uid = user.uid;
-        console.log(uid)
+        this.user = uid;
+        // console.log(uid)
         // ...
       } else {
         // User is signed out

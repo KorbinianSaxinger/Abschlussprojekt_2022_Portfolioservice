@@ -53,10 +53,7 @@ export default {
   data() {
     return {
       user: '',
-      positionName: '',
-      positionCurrency: '',
-      positionSymbol: '',
-      currenPrice: null,
+      // positionName: '',
       alert: '',
       searchValue: '',
       searchResult: [],
@@ -98,19 +95,6 @@ export default {
       }
     },
 
-    // async getPositions() {
-    //   const id = localStorage.portfolioID
-    //   console.log(id)
-    //   const db = getFirestore(app);
-    //   const docRef = doc(db, "watch", this.user);
-    //   const docSnap = await getDoc(docRef);
-    //
-    //   if (docSnap.exists()) {
-    //     const JSONString = JSON.stringify(docSnap.data());
-    //     const JSONObject = JSON.parse(JSONString);
-    //     this.positions = JSONObject.watch.filter(position => position.portfolioId == id);
-    //   }
-    // },
 
     GetNewPositionID() {
       const lastPosition = this.watchers.length
@@ -123,39 +107,6 @@ export default {
       this.searchResult = []
       this.$emit('close-search-bar')
     },
-    getStockData(symbol) {
-      let date = new Date()
-      console.log(date)
-      // this.stockValues = {}
-      const axios = require("axios");
-      const that = this
-
-      const encodedParams = new URLSearchParams();
-      encodedParams.append("symbol", symbol);
-      // encodedParams.append("longName", "");
-
-      const options = {
-        method: 'POST',
-        url: 'https://yahoo-finance97.p.rapidapi.com/stock-info',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          'X-RapidAPI-Key': 'a14022da84mshd39087a3bdc041ep1624c9jsn1ef31b2c1017',
-          'X-RapidAPI-Host': 'yahoo-finance97.p.rapidapi.com'
-        },
-        data: encodedParams
-      };
-
-      axios.request(options).then(function (response) {
-        const JSONString = JSON.stringify(response.data);
-        const JSONObject = JSON.parse(JSONString);
-        // console.log("Response",response.data)
-        that.changeStockValues(JSONObject.data)
-
-      }).catch(function (error) {
-        console.error(error);
-      });
-
-    },
 
     async add(item) {
 
@@ -164,33 +115,20 @@ export default {
         return item[key];
       });
 
-      console.log(values[0]);
-      this.getStockData(values[0])
+      console.log('add ',values);
       const newPositions = this.watchers;
-      console.log(newPositions)
+      // console.log(newPositions)
 
-      setTimeout(() => {
-        console.log(this.positionName)
-        console.log(this.positionSymbol)
-        // console.log(this.positionCurrency)
-        // console.log(this.currenPrice)
-
-        const name = this.positionName
+        const name = values[1]
         const portfolioID = localStorage.portfolioID
-        const currency = this.positionCurrency
-        const symbol = this.positionSymbol
-        const price = this.currenPrice
+        const currency = values[7]
+        const symbol = values[0]
+        const price = 0
 
-        this.positionName = ''
-        this.positionSymbol = ''
-        this.positionCurrency = ''
-        this.currenPrice = null
-        // this.searchValue = ''
-        // this.searchResult = []
 
         if (name === '') {
           this.closeSearch()
-          return this.alert = 'Zeitüberschreitung bei der Datenabfrage'
+          return this.alert = 'Kein Eintrag'
         }
 
         const createdWatch = {
@@ -215,53 +153,19 @@ export default {
           console.error("Error adding document: ", e);
         }
 
-
+        this.$emit('get-prices')
         this.getWatchers()
         this.closeSearch()
-      }, 4000)
 
-
-      // await this.fetchPortfolios()
-      // this.addPortfolio = false
-      // this.closeCard()
-      // this.$emit('close-positions')
-      // } else {
-      //   console.log("LAK DU CHUND")
-      // }
-
-      // this.$emit('get-new-watchers')
     },
 
     changeResult(object) {
       for (let i = 0; i < object.bestMatches.length; i++) {
-        console.log(object.bestMatches[i])
+        // console.log(object.bestMatches[i])
         this.searchResult.push(object.bestMatches[i])
       }
     },
 
-    changeStockValues(data) {
-
-      if (data.longName) {
-        // console.log(data.longName)
-        this.positionName = data.longName
-      }
-      else if (data.shortName) {
-        // console.log(data.shortName)
-        this.positionName = data.shortName
-      }
-      if (data.currency) {
-        this.positionCurrency = data.currency
-      }
-      if (data.currentPrice) {
-        this.currenPrice = data.currentPrice
-      }
-      if (data.symbol) {
-        this.positionSymbol = data.symbol
-      }
-
-      let date2 = new Date()
-      console.log(date2)
-    },
 
     searchStock(){
       this.$emit('open-search-bar')
