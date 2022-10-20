@@ -38,9 +38,9 @@
       </v-radio-group>
       <v-text-field
         class="textField"
-        v-model="isin"
+        v-model="symbol"
         outlined
-        placeholder="ISIN"
+        placeholder="Symbol"
       ></v-text-field>
       <v-text-field
           class="textField"
@@ -83,11 +83,12 @@ export default {
     return {
       datePicker: false,
       date: null,
+      symbol: '',
       user: '',
-      isin: '',
       name: '',
+      currency: '',
       qty: null,
-      price: null,
+      price: 0,
       portfolioID: null,
       portfolios: [],
       positions: [],
@@ -131,7 +132,7 @@ export default {
       const newPositions = this.positions;
 
       const createdPosition = {
-        isin: this.isin,
+        symbol: this.symbol,
         name: this.name,
         quantity: qty,
         price: parseFloat(this.price),
@@ -190,11 +191,16 @@ export default {
   },
   watch: {
     type() {
-      console.log(this.type)
+      // console.log(this.type)
     }
   },
   mounted() {
     this.portfolioID = localStorage.portfolioID
+    this.name = localStorage.transactionName
+    this.symbol = localStorage.symbol
+    this.currency = localStorage.currency
+    this.price = localStorage.currentPrice
+
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
       if (user) {
