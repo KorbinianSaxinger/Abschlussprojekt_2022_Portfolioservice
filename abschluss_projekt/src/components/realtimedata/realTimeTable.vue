@@ -115,7 +115,7 @@ export default {
         return item[key];
       });
 
-      console.log('add ',values);
+      // console.log('add ',values);
       const newPositions = this.watchers;
       // console.log(newPositions)
 
@@ -153,8 +153,6 @@ export default {
           console.error("Error adding document: ", e);
         }
 
-        this.$emit('get-prices')
-        this.getWatchers()
         this.closeSearch()
 
     },

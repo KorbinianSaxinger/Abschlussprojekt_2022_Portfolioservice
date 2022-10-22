@@ -135,6 +135,7 @@ export default {
         symbol: this.symbol,
         name: this.name,
         quantity: qty,
+        currency: this.currency,
         price: parseFloat(this.price),
         portfolioId: parseInt(this.portfolioID),
         created: this.date,

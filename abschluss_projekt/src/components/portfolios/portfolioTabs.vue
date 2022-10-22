@@ -52,7 +52,7 @@
         >
 
           <v-icon
-            style="color: green"
+            style="color: forestgreen"
           >
             mdi-plus
           </v-icon>
@@ -98,14 +98,48 @@
           sort-desc
         >
 
+          <template v-slot:[`item.buyValue`]="{ item }">
+            {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }}
+          </template>
           <template v-slot:[`item.value`]="{ item }">
-            {{ item.price * item.quantity.toString().replace('-','') + ' €'}}
+            <div
+              v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) > replaceMinus(item.price * item.quantity)"
+              class="upValue"
+            >
+                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+            </div>
+            <div
+                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) < replaceMinus(item.price * item.quantity)"
+                class="downValue"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+            </div>
+            <div
+                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) === replaceMinus(item.price * item.quantity)"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+            </div>
           </template>
 
           <template v-slot:[`item.price`]="{ item }">
-            {{ item.price }}
+            {{ formatNumber(item.price, item.currency) }}
           </template>
-
+          <template v-slot:[`item.currentPrice`]="{ item }">
+            <div v-if="currentPrice(item.symbol) > item.price"
+              class="upValue"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency) }}
+            </div>
+            <div v-if="currentPrice(item.symbol) < item.price"
+              class="downValue"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency) }}
+            </div>
+            <div v-if="currentPrice(item.symbol) == item.price"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency) }}
+            </div>
+          </template>
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
               @click="openDeletePosition(item.id, item.name)"
@@ -126,13 +160,15 @@
         </v-data-table>
 
         <v-data-table
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchers.length > 0"
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
           class="v-data-table elevation-1"
           :headers="watchHeaders"
           :items="watchers"
           must-sort
           sort-desc
+          sort-by="name"
           :items-per-page="10"
+          v-on:watchlist="getWatchers(localStorage.portfolioID)"
 
         >
           <template v-slot:[`item.action`]="{ item }">
@@ -141,7 +177,8 @@
             >mdi-cart-outline</v-icon>
           </template>
           <template v-slot:[`item.currentPrice`]="{ item }">
-          {{ item.currentPrice }}
+            {{ formatNumber(item.currentPrice, item.currency) }}
+
           </template>
 
         </v-data-table>
@@ -182,6 +219,7 @@ export default {
     deletePosition: false,
     transactionTable: false,
     watchTable: false,
+    addedWatcher: false,
     portfolioName: '',
     positions: [],
     watchers: [],
@@ -196,11 +234,13 @@ export default {
     headers: [
       {text: 'Buy/Sell', value: 'bns', align: 'end'},
       {text: 'Name', value: 'name', align: 'left'},
-      {text: 'Symbol', value: 'symbol', align: 'left'},
+      // {text: 'Symbol', value: 'symbol', align: 'left'},
       {text: 'Anzahl', value: 'quantity', align: 'left'},
+      {text: 'Einkaufskurs', value: 'price', align: 'left'},
+      {text: 'Kurs', value: 'currentPrice', align: 'left'},
+      {text: 'Einkaufswert', value: 'buyValue', align: 'left'},
+      {text: 'Wert', value: 'value', align: 'left'},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
-      {text: 'Stückpreis', value: 'price', align: 'left'},
-      {text: 'Gesamtpreis', value: 'value', align: 'left'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
 
     ],
@@ -214,6 +254,16 @@ export default {
     ]
   }),
   methods: {
+    formatNumber(number, currency) {
+      if (currency === 'USD') {
+        return number.toFixed(2) + ' $'
+      }
+      if (currency === 'EUR') {
+        return number.toFixed(2) + ' €'
+      } else {
+        return number.toFixed(2)
+      }
+    },
     changePositions(position) {
       if (position === 'transactions') {
         this.transactionTable = true
@@ -234,21 +284,38 @@ export default {
       localStorage.currentPrice = currentPrice
       this.addPosition = true
     },
+    currentPrice(symbol, wert, currency, quantity) {
+      let price = this.watchers.filter(watch => watch.symbol === symbol)
+      if (!quantity && price.length > 0) {
+        let values = Object.values(price);
+        return this.formatNumber(values[0].currentPrice, currency)
+      }
+      if (!quantity && price.length <= 0){
+        return this.formatNumber(wert, currency)
+      }
+      if (quantity && price.length > 0) {
+        let values = Object.values(price);
+        return this.formatNumber(quantity * values[0].currentPrice, currency)
+      } else {
+        return this.formatNumber(wert, currency)
+      }
+
+    },
     getPrice()
     {
       this.newWatchers = []
-
+      let id = localStorage.portfolioID
       const finnhub = require('finnhub');
       const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-      api_key.apiKey = "cd76caaad3i47lmpnibgcd76caaad3i47lmpnic0"
+      api_key.apiKey = "cda1b1iad3i97v8jaa80cda1b1iad3i97v8jaa8g"
       const finnhubClient = new finnhub.DefaultApi()
 
       for (let i = 0; i < this.allWatchers.length; i++) {
-
+        if (this.allWatchers[i].portfolioID === id) {
           let symbol = this.allWatchers[i].symbol
 
           finnhubClient.quote(symbol, (error, data, response) => {
-            if (error){
+            if (error) {
               console.log(error)
               console.log(response)
             }
@@ -267,18 +334,39 @@ export default {
               watch: this.newWatchers
             }
 
-            console.log(this.newWatchers)
             try {
               const db = getFirestore(app);
               setDoc(doc(db, "watch", this.user), newPrice);
             } catch (e) {
-              console.error("Error adding document: ", e);
+              console.error("Error add ing document: ", e);
             }
-          // console.log('new ', this.newWatchers)
-
           });
-      }
+        } else {
+          let update = {
+            currency: this.allWatchers[i].currency,
+            currentPrice: this.allWatchers[i].currentPrice,
+            name: this.allWatchers[i].name,
+            portfolioID: this.allWatchers[i].portfolioID,
+            symbol: this.allWatchers[i].symbol,
+          }
 
+          this.newWatchers.push(update)
+
+          const newPrice = {
+            watch: this.newWatchers
+          }
+
+          try {
+            const db = getFirestore(app);
+            setDoc(doc(db, "watch", this.user), newPrice);
+          } catch (e) {
+            console.error("Error adding document: ", e);
+          }
+        }
+      }
+      setTimeout(() => {
+        this.getWatchers(localStorage.portfolioID)
+      }, 500)
     },
 
 
@@ -286,8 +374,17 @@ export default {
       this.search = true
     },
     isNotSearch() {
-      this.getWatchers(localStorage.portfolioID)   
       this.search = false
+
+      setTimeout(() => {
+        this.getWatchers(localStorage.portfolioID)
+      }, 500)
+
+      if (this.addedWatcher === false) {
+        this.addedWatcher = true
+      } else {
+        this.addedWatcher = false
+      }
 
     },
     openAddPosition() {
@@ -326,8 +423,12 @@ export default {
       this.getPositions(portfolioID)
     },
     getTableData(id) {
+      this.safePortfolioID(id)
       this.getPositions(id)
       this.getWatchers(id)
+    },
+    replaceMinus(value) {
+      return parseFloat(value.toString().replace('-',''))
     },
     async getPositions(id) {
 
@@ -345,7 +446,6 @@ export default {
     },
 
     async getWatchers(id) {
-
       this.safePortfolioID(id)
 
       const db = getFirestore(app);
@@ -355,11 +455,8 @@ export default {
       if (docSnap.exists()) {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
-        // console.log(JSONObject.watch)
         this.allWatchers = JSONObject.watch
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
-        // console.log(this.watchers)
-
       }
     },
 
@@ -379,10 +476,11 @@ export default {
     },
   },
   watch: {
-    // watchers() {
-    //   console.log(this.watchers)
-    //   this.getPrice()
-    // },
+    addedWatcher() {
+      setTimeout(() => {
+        this.getPrice()
+      }, 1000)
+    },
     portfoliotabs() {
       this.loading = false
     },
@@ -401,7 +499,8 @@ export default {
       if (user) {
         this.user = user.uid;
         await this.fetchPortfolios();
-        await this.getPositions(this.portfoliotabs[0].id);
+        await this.getPositions(localStorage.portfolioID);
+        await this.getWatchers(localStorage.portfolioID)
       }
     });
   },
@@ -409,11 +508,17 @@ export default {
 </script>
 
 <style scoped>
+.upValue {
+  color: forestgreen;
+}
+.downValue {
+  color: red
+}
 .sellIcon {
   color: red;
 }
 .buyIcon {
-  color: green;
+  color: forestgreen;
 }
 .tableCard {
   margin-top: 10px;
@@ -425,8 +530,7 @@ export default {
 }
 
 .tabs {
-  color: green;
-  background-color: green;
+  color: forestgreen;
 }
 .v-data-table {
   margin-top: 20px;
