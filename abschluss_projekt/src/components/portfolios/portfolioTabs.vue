@@ -52,7 +52,7 @@
         >
 
           <v-icon
-            style="color: green"
+            style="color: forestgreen"
           >
             mdi-plus
           </v-icon>
@@ -98,17 +98,48 @@
           sort-desc
         >
 
-          <template v-slot:[`item.value`]="{ item }">
+          <template v-slot:[`item.buyValue`]="{ item }">
             {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }}
+          </template>
+          <template v-slot:[`item.value`]="{ item }">
+            <div
+              v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) > replaceMinus(item.price * item.quantity)"
+              class="upValue"
+            >
+                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+            </div>
+            <div
+                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) < replaceMinus(item.price * item.quantity)"
+                class="downValue"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+            </div>
+            <div
+                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) === replaceMinus(item.price * item.quantity)"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+            </div>
           </template>
 
           <template v-slot:[`item.price`]="{ item }">
             {{ formatNumber(item.price, item.currency) }}
           </template>
           <template v-slot:[`item.currentPrice`]="{ item }">
-            {{ currentPrice(item.symbol) }}
+            <div v-if="currentPrice(item.symbol) > item.price"
+              class="upValue"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency) }}
+            </div>
+            <div v-if="currentPrice(item.symbol) < item.price"
+              class="downValue"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency) }}
+            </div>
+            <div v-if="currentPrice(item.symbol) == item.price"
+            >
+              {{ currentPrice(item.symbol, item.price, item.currency) }}
+            </div>
           </template>
-
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
               @click="openDeletePosition(item.id, item.name)"
@@ -129,7 +160,7 @@
         </v-data-table>
 
         <v-data-table
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchers.length > 0"
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
           class="v-data-table elevation-1"
           :headers="watchHeaders"
           :items="watchers"
@@ -207,7 +238,8 @@ export default {
       {text: 'Anzahl', value: 'quantity', align: 'left'},
       {text: 'Einkaufskurs', value: 'price', align: 'left'},
       {text: 'Kurs', value: 'currentPrice', align: 'left'},
-      {text: 'Einkaufswert', value: 'value', align: 'left'},
+      {text: 'Einkaufswert', value: 'buyValue', align: 'left'},
+      {text: 'Wert', value: 'value', align: 'left'},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
 
@@ -252,14 +284,22 @@ export default {
       localStorage.currentPrice = currentPrice
       this.addPosition = true
     },
-    currentPrice(symbol) {
+    currentPrice(symbol, wert, currency, quantity) {
       let price = this.watchers.filter(watch => watch.symbol === symbol)
+      if (!quantity && price.length > 0) {
+        let values = Object.values(price);
+        return this.formatNumber(values[0].currentPrice, currency)
+      }
+      if (!quantity && price.length <= 0){
+        return this.formatNumber(wert, currency)
+      }
+      if (quantity && price.length > 0) {
+        let values = Object.values(price);
+        return this.formatNumber(quantity * values[0].currentPrice, currency)
+      } else {
+        return this.formatNumber(wert, currency)
+      }
 
-      let keys = Object.keys(price);
-      let values = keys.map(function(key) {
-        return price[key];
-      });
-      console.log('Price', values)
     },
     getPrice()
     {
@@ -298,7 +338,7 @@ export default {
               const db = getFirestore(app);
               setDoc(doc(db, "watch", this.user), newPrice);
             } catch (e) {
-              console.error("Error adding document: ", e);
+              console.error("Error add ing document: ", e);
             }
           });
         } else {
@@ -387,6 +427,9 @@ export default {
       this.getPositions(id)
       this.getWatchers(id)
     },
+    replaceMinus(value) {
+      return parseFloat(value.toString().replace('-',''))
+    },
     async getPositions(id) {
 
       this.safePortfolioID(id)
@@ -456,7 +499,8 @@ export default {
       if (user) {
         this.user = user.uid;
         await this.fetchPortfolios();
-        await this.getPositions(this.portfoliotabs[0].id);
+        await this.getPositions(localStorage.portfolioID);
+        await this.getWatchers(localStorage.portfolioID)
       }
     });
   },
@@ -464,11 +508,17 @@ export default {
 </script>
 
 <style scoped>
+.upValue {
+  color: forestgreen;
+}
+.downValue {
+  color: red
+}
 .sellIcon {
   color: red;
 }
 .buyIcon {
-  color: green;
+  color: forestgreen;
 }
 .tableCard {
   margin-top: 10px;
@@ -480,8 +530,7 @@ export default {
 }
 
 .tabs {
-  color: green;
-  background-color: green;
+  color: forestgreen;
 }
 .v-data-table {
   margin-top: 20px;
