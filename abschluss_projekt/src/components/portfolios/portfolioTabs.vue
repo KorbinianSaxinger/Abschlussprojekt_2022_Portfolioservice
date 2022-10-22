@@ -99,11 +99,14 @@
         >
 
           <template v-slot:[`item.value`]="{ item }">
-            {{ item.price * item.quantity.toString().replace('-','') + ' €'}}
+            {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }}
           </template>
 
           <template v-slot:[`item.price`]="{ item }">
-            {{ item.price }}
+            {{ formatNumber(item.price, item.currency) }}
+          </template>
+          <template v-slot:[`item.currentPrice`]="{ item }">
+            {{ currentPrice(item.symbol) }}
           </template>
 
           <template v-slot:[`item.action`]="{ item }">
@@ -132,7 +135,9 @@
           :items="watchers"
           must-sort
           sort-desc
+          sort-by="name"
           :items-per-page="10"
+          v-on:watchlist="getWatchers(localStorage.portfolioID)"
 
         >
           <template v-slot:[`item.action`]="{ item }">
@@ -141,7 +146,8 @@
             >mdi-cart-outline</v-icon>
           </template>
           <template v-slot:[`item.currentPrice`]="{ item }">
-          {{ item.currentPrice }}
+            {{ formatNumber(item.currentPrice, item.currency) }}
+
           </template>
 
         </v-data-table>
@@ -182,6 +188,7 @@ export default {
     deletePosition: false,
     transactionTable: false,
     watchTable: false,
+    addedWatcher: false,
     portfolioName: '',
     positions: [],
     watchers: [],
@@ -196,11 +203,12 @@ export default {
     headers: [
       {text: 'Buy/Sell', value: 'bns', align: 'end'},
       {text: 'Name', value: 'name', align: 'left'},
-      {text: 'Symbol', value: 'symbol', align: 'left'},
+      // {text: 'Symbol', value: 'symbol', align: 'left'},
       {text: 'Anzahl', value: 'quantity', align: 'left'},
+      {text: 'Einkaufskurs', value: 'price', align: 'left'},
+      {text: 'Kurs', value: 'currentPrice', align: 'left'},
+      {text: 'Einkaufswert', value: 'value', align: 'left'},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
-      {text: 'Stückpreis', value: 'price', align: 'left'},
-      {text: 'Gesamtpreis', value: 'value', align: 'left'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
 
     ],
@@ -214,6 +222,16 @@ export default {
     ]
   }),
   methods: {
+    formatNumber(number, currency) {
+      if (currency === 'USD') {
+        return number.toFixed(2) + ' $'
+      }
+      if (currency === 'EUR') {
+        return number.toFixed(2) + ' €'
+      } else {
+        return number.toFixed(2)
+      }
+    },
     changePositions(position) {
       if (position === 'transactions') {
         this.transactionTable = true
@@ -234,21 +252,30 @@ export default {
       localStorage.currentPrice = currentPrice
       this.addPosition = true
     },
+    currentPrice(symbol) {
+      let price = this.watchers.filter(watch => watch.symbol === symbol)
+
+      let keys = Object.keys(price);
+      let values = keys.map(function(key) {
+        return price[key];
+      });
+      console.log('Price', values)
+    },
     getPrice()
     {
       this.newWatchers = []
-
+      let id = localStorage.portfolioID
       const finnhub = require('finnhub');
       const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-      api_key.apiKey = "cd76caaad3i47lmpnibgcd76caaad3i47lmpnic0"
+      api_key.apiKey = "cda1b1iad3i97v8jaa80cda1b1iad3i97v8jaa8g"
       const finnhubClient = new finnhub.DefaultApi()
 
       for (let i = 0; i < this.allWatchers.length; i++) {
-
+        if (this.allWatchers[i].portfolioID === id) {
           let symbol = this.allWatchers[i].symbol
 
           finnhubClient.quote(symbol, (error, data, response) => {
-            if (error){
+            if (error) {
               console.log(error)
               console.log(response)
             }
@@ -267,18 +294,39 @@ export default {
               watch: this.newWatchers
             }
 
-            console.log(this.newWatchers)
             try {
               const db = getFirestore(app);
               setDoc(doc(db, "watch", this.user), newPrice);
             } catch (e) {
               console.error("Error adding document: ", e);
             }
-          // console.log('new ', this.newWatchers)
-
           });
-      }
+        } else {
+          let update = {
+            currency: this.allWatchers[i].currency,
+            currentPrice: this.allWatchers[i].currentPrice,
+            name: this.allWatchers[i].name,
+            portfolioID: this.allWatchers[i].portfolioID,
+            symbol: this.allWatchers[i].symbol,
+          }
 
+          this.newWatchers.push(update)
+
+          const newPrice = {
+            watch: this.newWatchers
+          }
+
+          try {
+            const db = getFirestore(app);
+            setDoc(doc(db, "watch", this.user), newPrice);
+          } catch (e) {
+            console.error("Error adding document: ", e);
+          }
+        }
+      }
+      setTimeout(() => {
+        this.getWatchers(localStorage.portfolioID)
+      }, 500)
     },
 
 
@@ -286,8 +334,17 @@ export default {
       this.search = true
     },
     isNotSearch() {
-      this.getWatchers(localStorage.portfolioID)   
       this.search = false
+
+      setTimeout(() => {
+        this.getWatchers(localStorage.portfolioID)
+      }, 500)
+
+      if (this.addedWatcher === false) {
+        this.addedWatcher = true
+      } else {
+        this.addedWatcher = false
+      }
 
     },
     openAddPosition() {
@@ -326,6 +383,7 @@ export default {
       this.getPositions(portfolioID)
     },
     getTableData(id) {
+      this.safePortfolioID(id)
       this.getPositions(id)
       this.getWatchers(id)
     },
@@ -345,7 +403,6 @@ export default {
     },
 
     async getWatchers(id) {
-
       this.safePortfolioID(id)
 
       const db = getFirestore(app);
@@ -355,11 +412,8 @@ export default {
       if (docSnap.exists()) {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
-        // console.log(JSONObject.watch)
         this.allWatchers = JSONObject.watch
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
-        // console.log(this.watchers)
-
       }
     },
 
@@ -379,10 +433,11 @@ export default {
     },
   },
   watch: {
-    // watchers() {
-    //   console.log(this.watchers)
-    //   this.getPrice()
-    // },
+    addedWatcher() {
+      setTimeout(() => {
+        this.getPrice()
+      }, 1000)
+    },
     portfoliotabs() {
       this.loading = false
     },
