@@ -24,6 +24,7 @@
       >
       </v-date-picker>
       <v-radio-group
+        class="radio"
         v-model="row"
         row
       >
@@ -36,12 +37,6 @@
         >
         </v-radio>
       </v-radio-group>
-      <v-text-field
-        class="textField"
-        v-model="symbol"
-        outlined
-        placeholder="Symbol"
-      ></v-text-field>
       <v-text-field
           class="textField"
           v-model="name"
@@ -60,6 +55,12 @@
           outlined
           placeholder="Preis"
       ></v-text-field>
+      <v-text-field
+          class="textField"
+          v-model="date"
+          outlined
+          placeholder="Datum"
+      ></v-text-field>
       <v-icon
         @click.prevent="datePicker = true"
       >mdi-calendar</v-icon><br>
@@ -76,6 +77,7 @@
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
 import app from "../../../firebase";
+import moment from "moment";
 
 export default {
   name: "createPosition",
@@ -87,6 +89,7 @@ export default {
       user: '',
       name: '',
       currency: '',
+      conversionUSDEUR: 1.0141,
       qty: null,
       price: 0,
       portfolioID: null,
@@ -137,9 +140,11 @@ export default {
         quantity: qty,
         currency: this.currency,
         price: parseFloat(this.price),
+        conversion: parseFloat(this.conversionUSDEUR),
         portfolioId: parseInt(this.portfolioID),
         created: this.date,
         id: this.GetNewPositionID(),
+
       };
 
       newPositions.push(createdPosition);
@@ -201,6 +206,9 @@ export default {
     this.symbol = localStorage.symbol
     this.currency = localStorage.currency
     this.price = localStorage.currentPrice
+    // this.conversionUSDEUR = localStorage.conversionRate
+    let now = new Date();
+    this.date = moment(now).format('YYYY-MM-DD');
 
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
@@ -215,6 +223,9 @@ export default {
 </script>
 
 <style scoped>
+.radio {
+  padding-left: 40px;
+}
 .picker {
   position: absolute;
   margin-left: 250px;
