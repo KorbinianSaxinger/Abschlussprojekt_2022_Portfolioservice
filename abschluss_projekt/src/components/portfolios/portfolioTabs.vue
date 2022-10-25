@@ -276,7 +276,7 @@ export default {
       localStorage.symbol = symbol
       localStorage.transactionName = name
       localStorage.currency = currency
-      localStorage.currentPrice = this.formatNumber(currentPrice, 'EUR')
+      localStorage.currentPrice = currentPrice
       this.addPosition = true
     },
     currentPrice(symbol, wert, currency, quantity) {
