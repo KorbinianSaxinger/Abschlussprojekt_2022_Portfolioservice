@@ -13,6 +13,7 @@
     "core-js": "^3.8.3",
     "finnhub": "^1.2.16",
     "firebase": "^9.10.0",
+    "moment": "^2.29.4",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "querystring-es3": "^0.2.1",
     "v-header": "^1.0.0",

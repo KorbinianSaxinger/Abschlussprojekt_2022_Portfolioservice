@@ -40,34 +40,19 @@
       </delete-position>
 
       <v-card
-          class="tableCard d-flex-row"
+          class="tableCard"
           v-if="addPosition !== true && addPortfolio !== true && deletePosition != true"
       >
 
-        <v-btn
-            type="submit"
-            class="button"
-            dark
-            @click.prevent="openAddPortfolio"
-        >
-
           <v-icon
+            class="plusIcon d-flex"
             style="color: forestgreen"
+            @click.prevent="openAddPortfolio"
+
           >
             mdi-plus
           </v-icon>
 
-        </v-btn>
-        <v-btn
-            type="submit"
-            class="addPositionBtn"
-            dark
-            @click.prevent="openAddPosition"
-        >
-          <v-icon
-              style="color: red"
-          >mdi-plus</v-icon>
-        </v-btn>
         <v-tabs
             class="tabs"
         >
@@ -82,13 +67,12 @@
         </v-tabs>
         <v-btn
           @click="getPrice"
-        >Update Prices</v-btn>
+        >Preise laden</v-btn>
         <real-time-table
           class="justify-start"
           v-on:open-search-bar="isSearch"
           v-on:close-search-bar="isNotSearch"
         />
-
         <v-data-table
           v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
           class="v-data-table"
@@ -97,49 +81,51 @@
           must-sort
           sort-desc
         >
-
           <template v-slot:[`item.buyValue`]="{ item }">
-            {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }}
+            {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }} <span class="currency"> {{ currency }}</span>
           </template>
+
           <template v-slot:[`item.value`]="{ item }">
             <div
               v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) > replaceMinus(item.price * item.quantity)"
               class="upValue"
             >
-                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
             <div
                 v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) < replaceMinus(item.price * item.quantity)"
                 class="downValue"
             >
-              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
             <div
                 v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) === replaceMinus(item.price * item.quantity)"
             >
-              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }}
+              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
           </template>
 
           <template v-slot:[`item.price`]="{ item }">
-            {{ formatNumber(item.price, item.currency) }}
+            {{ formatNumber(item.price, item.currency, item.conversion)  }} <span class="currency"> {{ currency }}</span>
           </template>
+
           <template v-slot:[`item.currentPrice`]="{ item }">
             <div v-if="currentPrice(item.symbol) > item.price"
               class="upValue"
             >
-              {{ currentPrice(item.symbol, item.price, item.currency) }}
+              {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
             </div>
             <div v-if="currentPrice(item.symbol) < item.price"
               class="downValue"
             >
-              {{ currentPrice(item.symbol, item.price, item.currency) }}
+              {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
             </div>
             <div v-if="currentPrice(item.symbol) == item.price"
             >
-              {{ currentPrice(item.symbol, item.price, item.currency) }}
+              {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
             </div>
           </template>
+
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
               @click="openDeletePosition(item.id, item.name)"
@@ -156,7 +142,6 @@
                 class="buyIcon"
             >mdi-arrow-up-bold</v-icon>
           </template>
-
         </v-data-table>
 
         <v-data-table
@@ -174,10 +159,13 @@
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
               @click.prevent="createPosition(item.symbol, item.name, item.currency, item.currentPrice)"
-            >mdi-cart-outline</v-icon>
+            >
+              mdi-cart-outline
+            </v-icon>
           </template>
+
           <template v-slot:[`item.currentPrice`]="{ item }">
-            {{ formatNumber(item.currentPrice, item.currency) }}
+            {{ formatNumber(item.currentPrice, item.currency) }} <span class="currency"> {{ currency }}</span>
 
           </template>
 
@@ -206,6 +194,7 @@ import CreatePosition from "@/components/positions/createPosition";
 import deletePosition from "@/components/positions/deletePosition";
 import AddPortfolio from "@/components/portfolios/addPortfolio";
 import RealTimeTable from "@/components/realtimedata/realTimeTable";
+import axios from "axios";
 // import finnhub from "finnhub";
 
 export default {
@@ -225,6 +214,8 @@ export default {
     watchers: [],
     allWatchers: [],
     newWatchers: [],
+    conversion: 1.0141,
+    currency: '€',
     user: '',
     portfoliotabs: [],
     menueTabs: [
@@ -238,10 +229,10 @@ export default {
       {text: 'Anzahl', value: 'quantity', align: 'left'},
       {text: 'Einkaufskurs', value: 'price', align: 'left'},
       {text: 'Kurs', value: 'currentPrice', align: 'left'},
-      {text: 'Einkaufswert', value: 'buyValue', align: 'left'},
+      {text: 'EK / VK Wert', value: 'buyValue', align: 'left'},
       {text: 'Wert', value: 'value', align: 'left'},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
-      {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
+      {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
 
     ],
     watchHeaders: [
@@ -249,19 +240,22 @@ export default {
       {text: 'Währung', value: 'currency', align: 'left'},
       {text: 'Symbol', value: 'symbol', align: 'left'},
       {text: 'Price', value: 'currentPrice', align: 'left'},
-      {text: 'Aktion', value: 'action', sortable: false, align: 'left'},
+      {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
 
     ]
   }),
   methods: {
-    formatNumber(number, currency) {
-      if (currency === 'USD') {
-        return number.toFixed(2) + ' $'
+    formatNumber(number, currency, conv) {
+      let conversion = this.conversion
+      if (number && conv) {
+        let value = number * conv
+        return parseFloat(value).toFixed(3).replace('.', ',')
       }
-      if (currency === 'EUR') {
-        return number.toFixed(2) + ' €'
-      } else {
-        return number.toFixed(2)
+      if (number && currency != null){
+        let value = number * conversion
+        return parseFloat(value).toFixed(3).replace('.',',')
+      }else {
+        return parseFloat(number)
       }
     },
     changePositions(position) {
@@ -301,13 +295,30 @@ export default {
       }
 
     },
+    getConversion(from, to) {
+      const options = {
+        method: 'GET',
+        url: 'https://currency-converter18.p.rapidapi.com/api/v1/convert',
+        params: {from: from, to: to, amount: '1'},
+        headers: {
+          'X-RapidAPI-Key': '58ce557142msh90b2532927f2240p16a65cjsnc9bdc393aff9',
+          'X-RapidAPI-Host': 'currency-converter18.p.rapidapi.com'
+        }
+      };
+
+      axios.request(options).then(function (response) {
+        localStorage.conversionRate = response.data.result.convertedAmount
+      }).catch(function (error) {
+        console.error(error);
+      });
+    },
     getPrice()
     {
       this.newWatchers = []
       let id = localStorage.portfolioID
       const finnhub = require('finnhub');
       const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-      api_key.apiKey = "cda1b1iad3i97v8jaa80cda1b1iad3i97v8jaa8g"
+      api_key.apiKey = "cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00"
       const finnhubClient = new finnhub.DefaultApi()
 
       for (let i = 0; i < this.allWatchers.length; i++) {
@@ -316,7 +327,7 @@ export default {
 
           finnhubClient.quote(symbol, (error, data, response) => {
             if (error) {
-              console.log(error)
+              // console.log(error)
               console.log(response)
             }
 
@@ -493,7 +504,7 @@ export default {
   },
 
   mounted() {
-    // this.getPrice()
+    this.getConversion('USD', 'EUR')
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -508,6 +519,13 @@ export default {
 </script>
 
 <style scoped>
+.currency {
+  color: black;
+}
+.plusIcon {
+  padding-top: 5px;
+  margin: 0px 0px 0px 5px;
+}
 .upValue {
   color: forestgreen;
 }
