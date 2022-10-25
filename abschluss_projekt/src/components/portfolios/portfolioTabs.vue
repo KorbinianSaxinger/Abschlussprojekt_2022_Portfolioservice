@@ -78,8 +78,9 @@
           class="v-data-table"
           :headers="headers"
           :items="positions"
+          sort-by="name"
           must-sort
-          sort-desc
+          sort-asc
         >
           <template v-slot:[`item.buyValue`]="{ item }">
             {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }} <span class="currency"> {{ currency }}</span>
@@ -150,7 +151,7 @@
           :headers="watchHeaders"
           :items="watchers"
           must-sort
-          sort-desc
+          sort-asc
           sort-by="name"
           :items-per-page="10"
           v-on:watchlist="getWatchers(localStorage.portfolioID)"
@@ -275,7 +276,7 @@ export default {
       localStorage.symbol = symbol
       localStorage.transactionName = name
       localStorage.currency = currency
-      localStorage.currentPrice = currentPrice
+      localStorage.currentPrice = this.formatNumber(currentPrice, 'EUR')
       this.addPosition = true
     },
     currentPrice(symbol, wert, currency, quantity) {
