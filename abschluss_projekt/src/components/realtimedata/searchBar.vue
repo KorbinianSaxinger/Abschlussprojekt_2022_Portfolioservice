@@ -94,9 +94,17 @@ export default {
 
 
     GetNewPositionID() {
-      const lastPosition = this.watchers.length
-      if(lastPosition <= 0) return 0
-      return this.watchers[lastPosition-1].id + 1
+      if (!this.watchers) {
+        return 0
+      } else {
+        if (this.watchers.length === 0) {
+          return 0
+        }else {
+          const watchers = this.watchers.length
+          return this.watchers[watchers-1].id + 1
+        }
+
+      }
     },
 
     closeSearch() {
@@ -111,7 +119,7 @@ export default {
         return item[key];
       });
 
-      const newPositions = this.watchers;
+        let newPositions = this.watchers;
 
         const name = values[1]
         const portfolioID = localStorage.portfolioID
@@ -133,8 +141,13 @@ export default {
           currentPrice: price,
           id: this.GetNewPositionID(),
         };
+        if(this.watchers) {
+          newPositions.push(createdWatch);
+        } else {
+          newPositions = []
+          newPositions.push(createdWatch);
 
-        newPositions.push(createdWatch);
+        }
 
         const addwatch = {
           watch: newPositions
