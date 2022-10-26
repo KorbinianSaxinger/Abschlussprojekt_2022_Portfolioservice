@@ -14,7 +14,7 @@
       </v-card-title>
       <v-text-field
           class="text-field d-flex"
-          label="Portfolio Name"
+          placeholder="Portfolio Name"
           v-model="portfolioName"
           outlined
       >

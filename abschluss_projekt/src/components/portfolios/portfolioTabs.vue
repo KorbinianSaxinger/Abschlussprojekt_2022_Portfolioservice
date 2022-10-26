@@ -48,23 +48,51 @@
           class="tableCard"
           v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deletePortfolio !== true"
       >
+        <v-app id="inspire">
         <div class="iconWrapper">
         <div class="menuIcons d-flex">
-          <v-icon
-              style="color: forestgreen"
-              @click.prevent="openAddPortfolio"
-
-          >
-            mdi-plus
-          </v-icon>
-          <v-icon
-              style="color: forestgreen"
-              @click.prevent="openDeletePortfolio(portfolioID)"
-          >
-            mdi-minus
-          </v-icon>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                  style="color: forestgreen;"
+                  @click.prevent="openAddPortfolio"
+                  v-on="on"
+                  dark
+              >
+                mdi-plus
+              </v-icon>
+            </template>
+            <span>Portfolio erstellen</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                  style="color: forestgreen;"
+                  @click.prevent="openDeletePortfolio(portfolioID)"
+                  v-on="on"
+                  dark
+              >
+                mdi-minus
+              </v-icon>
+            </template>
+            <span>Portfolio löschen</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-icon
+                  style="color: forestgreen;"
+                  @click.prevent="getPrice"
+                  v-on="on"
+                  dark
+              >
+                mdi-replay
+              </v-icon>
+            </template>
+            <span>Preise neu laden</span>
+          </v-tooltip>
         </div>
         </div>
+        </v-app>
 
         <v-tabs
             class="tabs"
@@ -78,10 +106,8 @@
             {{ item.text }}
           </v-tab>
         </v-tabs>
-        <v-btn
-          @click="getPrice"
-        >Preise laden</v-btn>
         <search-bar
+          v-if="watchTable === true"
           class="justify-start"
           v-on:open-search-bar="isSearch"
           v-on:close-search-bar="isNotSearch"
@@ -556,11 +582,13 @@ export default {
 .currency {
   color: black;
 }
+#inspire {
+  height: 40px;
+}
 .iconWrapper {
   height: 40px;
 }
 .menuIcons {
-  padding-top: 8px;
   margin: 10px 10px 10px 5px;
 }
 .normalValue {
