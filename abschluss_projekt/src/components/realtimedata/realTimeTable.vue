@@ -85,10 +85,8 @@ export default {
       if (docSnap.exists()) {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
-        // console.log(JSONObject.watch)
 
         this.watchers = JSONObject.watch;
-        // console.log(this.watchers)
 
       } else {
         // this.alert = 'Keine Beobachteten Positionen'
@@ -99,7 +97,6 @@ export default {
     GetNewPositionID() {
       const lastPosition = this.watchers.length
       if(lastPosition <= 0) return 0
-      // console.log(this.positions)
       return this.watchers[lastPosition-1].id + 1
     },
 
@@ -115,9 +112,7 @@ export default {
         return item[key];
       });
 
-      // console.log('add ',values);
       const newPositions = this.watchers;
-      // console.log(newPositions)
 
         const name = values[1]
         const portfolioID = localStorage.portfolioID
@@ -159,7 +154,6 @@ export default {
 
     changeResult(object) {
       for (let i = 0; i < object.bestMatches.length; i++) {
-        // console.log(object.bestMatches[i])
         this.searchResult.push(object.bestMatches[i])
       }
     },

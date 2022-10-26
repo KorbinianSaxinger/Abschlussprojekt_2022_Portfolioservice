@@ -107,7 +107,6 @@ export default {
   methods: {
     changeDate() {
       this.datePicker = false
-      console.log(this.date)
     },
     changeTransactionType(type) {
       this.type = type
@@ -120,7 +119,6 @@ export default {
       if(lastPosition === 0) {
         return 0
       }
-      // console.log(this.positions)
       return this.positions[lastPosition-1].id + 1
     },
     async createPosition() {
@@ -163,16 +161,13 @@ export default {
       await this.fetchPortfolios()
       this.addPortfolio = false
       this.closeCard()
-        // this.$emit('close-positions')
       // } else {
-      //   console.log("LAK DU CHUND")
       // }
     },
 
     async getPositions() {
 
       const db = getFirestore(app);
-      // console.log(this.user)
       const docRef = doc(db, "positions", this.user);
       const docSnap = await getDoc(docRef);
 
@@ -194,11 +189,6 @@ export default {
         this.portfolios = JSONObject.portfolios;
       }
     },
-  },
-  watch: {
-    type() {
-      // console.log(this.type)
-    }
   },
   mounted() {
     this.portfolioID = localStorage.portfolioID

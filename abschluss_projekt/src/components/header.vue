@@ -43,11 +43,8 @@ export default {
       const ref = this;
       signOut(auth).then(() => {
         ref.user = '';
-        console.log('Loget Out ',ref.user)
-        // Sign-out successful.
       }).catch((error) => {
         console.log(error)
-        // An error happened.
       }).finally(() => {
         router.push('login')
       });
@@ -57,17 +54,9 @@ export default {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log(user)
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        this.isLogedin = true
         this.user = user.uid;
-        // const uid = user.uid;
-        // console.log(uid)
-        // ...
       } else {
-        // User is signed out
-        // ...
+          console.log('Nicht angemeldet')
       }
     });
   }

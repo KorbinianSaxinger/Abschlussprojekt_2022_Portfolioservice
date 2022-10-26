@@ -87,23 +87,27 @@
           </template>
 
           <template v-slot:[`item.value`]="{ item }">
+
             <div
-              v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) > replaceMinus(item.price * item.quantity)"
+                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency).replace('-','')"
+                class="normalValue"
+            >
+
+                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','').replace('.',',') }} <span class="currency"> {{ currency }}</span>
+            </div>
+            <div
+              v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency).replace('-','')"
               class="upValue"
             >
                 {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
             <div
-                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) < replaceMinus(item.price * item.quantity)"
+                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency).replace('-','')"
                 class="downValue"
             >
               {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
-            <div
-                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) === replaceMinus(item.price * item.quantity)"
-            >
-              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
-            </div>
+
           </template>
 
           <template v-slot:[`item.price`]="{ item }">
@@ -167,7 +171,6 @@
 
           <template v-slot:[`item.currentPrice`]="{ item }">
             {{ formatNumber(item.currentPrice, item.currency) }} <span class="currency"> {{ currency }}</span>
-
           </template>
 
         </v-data-table>
@@ -328,7 +331,6 @@ export default {
 
           finnhubClient.quote(symbol, (error, data, response) => {
             if (error) {
-              // console.log(error)
               console.log(response)
             }
 
@@ -505,7 +507,7 @@ export default {
   },
 
   mounted() {
-    this.getConversion('USD', 'EUR')
+    // this.getConversion('USD', 'EUR')
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -526,6 +528,9 @@ export default {
 .plusIcon {
   padding-top: 5px;
   margin: 0px 0px 0px 5px;
+}
+.normalValue {
+  color: black;
 }
 .upValue {
   color: forestgreen;
