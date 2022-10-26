@@ -8,7 +8,6 @@ import Register from "@/components/auth/register";
 import Landingpage from "@/components/landingpage";
 import portfolioTabs from "@/components/portfolios/portfolioTabs";
 import createPosition from "@/components/positions/createPosition";
-import getAllPrices from "@/components/realtimedata/getAllPrices";
 
 Vue.use(VueRouter)
 
@@ -17,11 +16,6 @@ const routes = [
     path: '/',
     name: 'landing',
     component: Landingpage
-  },
-  {
-    path: '/getprices',
-    name: 'getPrices',
-    component: getAllPrices
   },
   {
     path: '/home',

@@ -62,8 +62,6 @@ export default {
         return true
       }
       if (this.portfoliotabs.filter(portfolio => portfolio.name.toUpperCase() === name.toUpperCase()).length > 0) {
-        // console.log(name)
-        // console.log(this.portfoliotabs.filter(portfolio => portfolio.name.toUpperCase() === name.toUpperCase()).length > 0)
         return false
       }
       return true

@@ -78,8 +78,8 @@ export default {
           .catch((error) => {
             // Handle Errors here.
             console.log(error)
+            console.log(error.code)
             // const errorCode = error.code;
-            // const errorMessage = error.message;
           })
           .finally(() => {
             if (ref.user !== '') {
@@ -89,18 +89,10 @@ export default {
     },
   },
   mounted() {
-    // console.log('login')
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log(user)
-        // console.log(user)
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        this.user = user.uid;
-        // const uid = user.uid;
-        // console.log(uid)
-        // ...
+       this.user = user.uid;
       } else {
         // User is signed out
         // ...
