@@ -23,6 +23,11 @@
       v-on:close-add-portfolio="closeCreatePortfolio  "
     ></add-portfolio>
     <div>
+      <delete-portfolio
+          v-if="deletePortfolio === true"
+          v-on:close-delete-portfolio="closeDeletePortfolio"
+          v-on:update-portfolios="fetchPortfolios"
+      />
 
       <create-position
         class="addPosition"
@@ -41,17 +46,25 @@
 
       <v-card
           class="tableCard"
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition != true"
+          v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deletePortfolio !== true"
       >
-
+        <div class="iconWrapper">
+        <div class="menuIcons d-flex">
           <v-icon
-            class="plusIcon d-flex"
-            style="color: forestgreen"
-            @click.prevent="openAddPortfolio"
+              style="color: forestgreen"
+              @click.prevent="openAddPortfolio"
 
           >
             mdi-plus
           </v-icon>
+          <v-icon
+              style="color: forestgreen"
+              @click.prevent="openDeletePortfolio(portfolioID)"
+          >
+            mdi-minus
+          </v-icon>
+        </div>
+        </div>
 
         <v-tabs
             class="tabs"
@@ -199,20 +212,23 @@ import deletePosition from "@/components/positions/deletePosition";
 import AddPortfolio from "@/components/portfolios/addPortfolio";
 import axios from "axios";
 import SearchBar from "@/components/realtimedata/searchBar";
+import DeletePortfolio from "@/components/portfolios/deletePortfolio";
 // import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
-  components: {SearchBar, AddPortfolio, CreatePosition, deletePosition},
+  components: {DeletePortfolio, SearchBar, AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
     search: false,
     addPortfolio: false,
     addPosition: false,
     deletePosition: false,
+    deletePortfolio: false,
     transactionTable: false,
     watchTable: false,
     addedWatcher: false,
+    portfolioID: null,
     portfolioName: '',
     positions: [],
     watchers: [],
@@ -419,8 +435,18 @@ export default {
       localStorage.positionName = name
       localStorage.positions = this.positions
     },
+    openDeletePortfolio(id) {
+      this.safePortfolioID(id)
+      this.deletePortfolio = true
+      const portfolio = this.portfoliotabs.filter(portfolio => portfolio.id == id)
+      console.log(portfolio[0].name)
+      localStorage.portfolioName = portfolio[0].name
+    },
     closeDeletePosition() {
       this.deletePosition = false
+    },
+    closeDeletePortfolio() {
+      this.deletePortfolio = false
     },
     openAddPortfolio() {
       this.addPortfolio = true
@@ -433,6 +459,7 @@ export default {
 
     safePortfolioID(portfolioID) {
       localStorage.portfolioID = portfolioID
+      this.portfolioID = portfolioID
     },
 
     updatePositions() {
@@ -443,9 +470,6 @@ export default {
       this.safePortfolioID(id)
       this.getPositions(id)
       this.getWatchers(id)
-    },
-    replaceMinus(value) {
-      return parseFloat(value.toString().replace('-',''))
     },
     async getPositions(id) {
 
@@ -494,9 +518,7 @@ export default {
   },
   watch: {
     conf() {
-      console.log("conf")
       this.conversion = localStorage.conversionRate
-      console.log(this.conversion)
     },
     addedWatcher() {
       setTimeout(() => {
@@ -523,6 +545,7 @@ export default {
         await this.fetchPortfolios();
         await this.getPositions(localStorage.portfolioID);
         await this.getWatchers(localStorage.portfolioID)
+        this.portfolioID = localStorage.portfolioID
       }
     });
   },
@@ -533,9 +556,12 @@ export default {
 .currency {
   color: black;
 }
-.plusIcon {
-  padding-top: 5px;
-  margin: 0px 0px 0px 5px;
+.iconWrapper {
+  height: 40px;
+}
+.menuIcons {
+  padding-top: 8px;
+  margin: 10px 10px 10px 5px;
 }
 .normalValue {
   color: black;
