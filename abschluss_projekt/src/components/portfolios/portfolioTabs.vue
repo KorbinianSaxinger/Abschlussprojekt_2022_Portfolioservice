@@ -68,7 +68,7 @@
         <v-btn
           @click="getPrice"
         >Preise laden</v-btn>
-        <real-time-table
+        <search-bar
           class="justify-start"
           v-on:open-search-bar="isSearch"
           v-on:close-search-bar="isNotSearch"
@@ -197,13 +197,13 @@ import { getFirestore } from "firebase/firestore";
 import CreatePosition from "@/components/positions/createPosition";
 import deletePosition from "@/components/positions/deletePosition";
 import AddPortfolio from "@/components/portfolios/addPortfolio";
-import RealTimeTable from "@/components/realtimedata/realTimeTable";
 import axios from "axios";
+import SearchBar from "@/components/realtimedata/searchBar";
 // import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
-  components: {RealTimeTable, AddPortfolio, CreatePosition, deletePosition},
+  components: {SearchBar, AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
     search: false,
@@ -219,6 +219,7 @@ export default {
     allWatchers: [],
     newWatchers: [],
     conversion: 1.0141,
+    conf: 0,
     currency: '€',
     user: '',
     portfoliotabs: [],
@@ -305,7 +306,7 @@ export default {
         url: 'https://currency-converter18.p.rapidapi.com/api/v1/convert',
         params: {from: from, to: to, amount: '1'},
         headers: {
-          'X-RapidAPI-Key': '58ce557142msh90b2532927f2240p16a65cjsnc9bdc393aff9',
+          'X-RapidAPI-Key': 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38',
           'X-RapidAPI-Host': 'currency-converter18.p.rapidapi.com'
         }
       };
@@ -315,9 +316,11 @@ export default {
       }).catch(function (error) {
         console.error(error);
       });
+      this.conf = 1
     },
     getPrice()
     {
+      this.getConversion('USD', 'EUR')
       this.newWatchers = []
       let id = localStorage.portfolioID
       const finnhub = require('finnhub');
@@ -490,6 +493,11 @@ export default {
     },
   },
   watch: {
+    conf() {
+      console.log("conf")
+      this.conversion = localStorage.conversionRate
+      console.log(this.conversion)
+    },
     addedWatcher() {
       setTimeout(() => {
         this.getPrice()
@@ -507,7 +515,7 @@ export default {
   },
 
   mounted() {
-    // this.getConversion('USD', 'EUR')
+    this.getConversion('USD', 'EUR')
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
       if (user) {

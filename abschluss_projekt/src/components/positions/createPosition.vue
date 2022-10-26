@@ -196,6 +196,7 @@ export default {
     this.symbol = localStorage.symbol
     this.currency = localStorage.currency
     this.price = localStorage.currentPrice
+    this.conversionUSDEUR = localStorage.conversionRate
     let now = new Date();
     this.date = moment(now).format('YYYY-MM-DD');
 

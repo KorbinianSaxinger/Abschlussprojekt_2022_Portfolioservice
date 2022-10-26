@@ -48,7 +48,7 @@ import app from "../../../firebase";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 
 export default {
-  name: "realTimeTable",
+  name: "searchBar",
 
   data() {
     return {
@@ -64,8 +64,7 @@ export default {
       headers: [
         {text: 'Name', value: '2. name', align: 'center'},
         {text: 'Symbol', value: '1. symbol', align: 'center'},
-        {text: 'Wert', value: 'value', align: 'center'},
-        {text: 'add', value: 'add', sortable: false, align: 'center'},
+        {text: 'Hinzufügen', value: 'add', sortable: false, align: 'center'},
       ]
     }
   },
