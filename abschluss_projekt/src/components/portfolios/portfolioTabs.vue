@@ -279,7 +279,7 @@ export default {
       localStorage.symbol = symbol
       localStorage.transactionName = name
       localStorage.currency = currency
-      localStorage.currentPrice = currentPrice
+      localStorage.currentPrice = this.formatNumber(currentPrice, currency, this.conversion)
       this.addPosition = true
     },
     currentPrice(symbol, wert, currency, quantity) {
@@ -305,13 +305,30 @@ export default {
         url: 'https://currency-converter18.p.rapidapi.com/api/v1/convert',
         params: {from: from, to: to, amount: '1'},
         headers: {
-          'X-RapidAPI-Key': '58ce557142msh90b2532927f2240p16a65cjsnc9bdc393aff9',
+          // 'X-RapidAPI-Key': '58ce557142msh90b2532927f2240p16a65cjsnc9bdc393aff9',
+          'X-RapidAPI-Key': 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38',
           'X-RapidAPI-Host': 'currency-converter18.p.rapidapi.com'
         }
       };
 
       axios.request(options).then(function (response) {
         localStorage.conversionRate = response.data.result.convertedAmount
+      }).catch(function (error) {
+        console.error(error);
+      });
+      const options2 = {
+        method: 'GET',
+        url: 'https://currency-converter18.p.rapidapi.com/api/v1/convert',
+        params: {from: to, to: from, amount: '1'},
+        headers: {
+          // 'X-RapidAPI-Key': '58ce557142msh90b2532927f2240p16a65cjsnc9bdc393aff9',
+          'X-RapidAPI-Key': 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38',
+          'X-RapidAPI-Host': 'currency-converter18.p.rapidapi.com'
+        }
+      };
+
+      axios.request(options2).then(function (response) {
+        localStorage.reverseConversionRate = response.data.result.convertedAmount
       }).catch(function (error) {
         console.error(error);
       });

@@ -89,7 +89,8 @@ export default {
       user: '',
       name: '',
       currency: '',
-      conversionUSDEUR: 1.0141,
+      conversion: 1.0141,
+      reverseConversion: 0.995,
       qty: null,
       price: 0,
       portfolioID: null,
@@ -131,14 +132,16 @@ export default {
       let qty = parseFloat(this.qty) * modifier
 
       const newPositions = this.positions;
+      console.log(this.conversion)
+      console.log(this.reverseConversion)
 
       const createdPosition = {
         symbol: this.symbol,
         name: this.name,
         quantity: qty,
         currency: this.currency,
-        price: parseFloat(this.price),
-        conversion: parseFloat(this.conversionUSDEUR),
+        price: parseFloat(this.price * this.reverseConversion),
+        conversion: parseFloat(this.conversion),
         portfolioId: parseInt(this.portfolioID),
         created: this.date,
         id: this.GetNewPositionID(),
@@ -195,6 +198,8 @@ export default {
     this.name = localStorage.transactionName
     this.symbol = localStorage.symbol
     this.currency = localStorage.currency
+    this.conversion = localStorage.conversionRate
+    this.reverseConversion = localStorage.reverseConversionRate
     this.price = localStorage.currentPrice
     let now = new Date();
     this.date = moment(now).format('YYYY-MM-DD');
