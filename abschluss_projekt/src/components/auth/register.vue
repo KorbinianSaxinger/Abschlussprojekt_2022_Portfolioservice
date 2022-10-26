@@ -68,14 +68,11 @@ export default {
             // Signed in
             const user = userCredential.user;
             this.user = user
-            // console.log(user)
             // ...
           })
           .catch((error) => {
             console.log(error)
-            // const errorCode = error.code;
-            // const errorMessage = error.message;
-            // ..
+            console.log(error.code)
           })
           .finally(() => {
               router.push('home')
@@ -86,14 +83,8 @@ export default {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // console.log(user)
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-
         const uid = user.uid;
         this.user = uid;
-        // console.log(uid)
-        // ...
       } else {
         // User is signed out
         // ...

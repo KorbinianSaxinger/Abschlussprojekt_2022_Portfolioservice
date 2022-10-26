@@ -68,7 +68,7 @@
         <v-btn
           @click="getPrice"
         >Preise laden</v-btn>
-        <real-time-table
+        <search-bar
           class="justify-start"
           v-on:open-search-bar="isSearch"
           v-on:close-search-bar="isNotSearch"
@@ -87,23 +87,27 @@
           </template>
 
           <template v-slot:[`item.value`]="{ item }">
+
             <div
-              v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) > replaceMinus(item.price * item.quantity)"
+                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency).replace('-','')"
+                class="normalValue"
+            >
+
+                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','').replace('.',',') }} <span class="currency"> {{ currency }}</span>
+            </div>
+            <div
+              v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency).replace('-','')"
               class="upValue"
             >
                 {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
             <div
-                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) < replaceMinus(item.price * item.quantity)"
+                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency).replace('-','')"
                 class="downValue"
             >
               {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
-            <div
-                v-if="parseFloat(currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','')) === replaceMinus(item.price * item.quantity)"
-            >
-              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
-            </div>
+
           </template>
 
           <template v-slot:[`item.price`]="{ item }">
@@ -167,7 +171,6 @@
 
           <template v-slot:[`item.currentPrice`]="{ item }">
             {{ formatNumber(item.currentPrice, item.currency) }} <span class="currency"> {{ currency }}</span>
-
           </template>
 
         </v-data-table>
@@ -194,13 +197,13 @@ import { getFirestore } from "firebase/firestore";
 import CreatePosition from "@/components/positions/createPosition";
 import deletePosition from "@/components/positions/deletePosition";
 import AddPortfolio from "@/components/portfolios/addPortfolio";
-import RealTimeTable from "@/components/realtimedata/realTimeTable";
 import axios from "axios";
+import SearchBar from "@/components/realtimedata/searchBar";
 // import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
-  components: {RealTimeTable, AddPortfolio, CreatePosition, deletePosition},
+  components: {SearchBar, AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
     search: false,
@@ -216,6 +219,7 @@ export default {
     allWatchers: [],
     newWatchers: [],
     conversion: 1.0141,
+    conf: 0,
     currency: '€',
     user: '',
     portfoliotabs: [],
@@ -276,7 +280,7 @@ export default {
       localStorage.symbol = symbol
       localStorage.transactionName = name
       localStorage.currency = currency
-      localStorage.currentPrice = this.formatNumber(currentPrice, 'EUR')
+      localStorage.currentPrice = currentPrice
       this.addPosition = true
     },
     currentPrice(symbol, wert, currency, quantity) {
@@ -302,7 +306,7 @@ export default {
         url: 'https://currency-converter18.p.rapidapi.com/api/v1/convert',
         params: {from: from, to: to, amount: '1'},
         headers: {
-          'X-RapidAPI-Key': '58ce557142msh90b2532927f2240p16a65cjsnc9bdc393aff9',
+          'X-RapidAPI-Key': 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38',
           'X-RapidAPI-Host': 'currency-converter18.p.rapidapi.com'
         }
       };
@@ -312,9 +316,11 @@ export default {
       }).catch(function (error) {
         console.error(error);
       });
+      this.conf = 1
     },
     getPrice()
     {
+      this.getConversion('USD', 'EUR')
       this.newWatchers = []
       let id = localStorage.portfolioID
       const finnhub = require('finnhub');
@@ -328,7 +334,6 @@ export default {
 
           finnhubClient.quote(symbol, (error, data, response) => {
             if (error) {
-              // console.log(error)
               console.log(response)
             }
 
@@ -488,6 +493,11 @@ export default {
     },
   },
   watch: {
+    conf() {
+      console.log("conf")
+      this.conversion = localStorage.conversionRate
+      console.log(this.conversion)
+    },
     addedWatcher() {
       setTimeout(() => {
         this.getPrice()
@@ -526,6 +536,9 @@ export default {
 .plusIcon {
   padding-top: 5px;
   margin: 0px 0px 0px 5px;
+}
+.normalValue {
+  color: black;
 }
 .upValue {
   color: forestgreen;
