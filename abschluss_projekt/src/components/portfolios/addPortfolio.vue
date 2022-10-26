@@ -102,9 +102,17 @@ export default {
     },
 
     GetNewPortfolioID() {
-      const portfolios = this.portfoliotabs.length
-      if(portfolios < 1) return 0
-      return this.portfoliotabs[portfolios-1].id + 1
+      if (!this.portfoliotabs) {
+        return 0
+      } else {
+        if (this.portfoliotabs.length === 0) {
+          return 0
+        }else {
+          const portfolios = this.portfoliotabs.length
+          return this.portfoliotabs[portfolios-1].id + 1
+        }
+
+      }
     },
 
     async createPortfolio() {
@@ -117,7 +125,11 @@ export default {
 
 
         const userPortfolios = [];
-        for (let i = 0; i < this.portfoliotabs.length; i++) {
+        let loopCount = 0
+        if (this.portfoliotabs) {
+          loopCount = this.portfoliotabs.length
+        }
+        for (let i = 0; i < loopCount; i++) {
           const portfolio =  this.portfoliotabs[i];
           userPortfolios.push(portfolio);
         }
