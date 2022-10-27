@@ -26,7 +26,7 @@
       <delete-portfolio
           v-if="deletePortfolio === true"
           v-on:close-delete-portfolio="closeDeletePortfolio"
-          v-on:update-portfolios="fetchPortfolios"
+          v-on:update-portfolios="updatePortfolios"
       />
 
       <create-position
@@ -300,6 +300,12 @@ export default {
     ]
   }),
   methods: {
+    updatePortfolios() {
+      const id = this.portfoliotabs[this.portfoliotabs.length-2].id
+      this.fetchPortfolios()
+      this.getPositions(id)
+
+    },
     formatNumber(number, currency, conv) {
       let conversion = this.conversion
       if (number && conv) {
@@ -483,6 +489,8 @@ export default {
     },
     closeDeletePortfolio() {
       this.deletePortfolio = false
+      this.watchTable = false
+      this.transactionTable = true
     },
     openAddPortfolio() {
       this.addPortfolio = true
@@ -580,7 +588,7 @@ export default {
       if (user) {
         this.user = user.uid;
         await this.fetchPortfolios();
-        await this.getPositions(localStorage.portfolioID);
+        await this.getPositions(localStorage.portfolioID)
         await this.getWatchers(localStorage.portfolioID)
         this.portfolioID = localStorage.portfolioID
       }
