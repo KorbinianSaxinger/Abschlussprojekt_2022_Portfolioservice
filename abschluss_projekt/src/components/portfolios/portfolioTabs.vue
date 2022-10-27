@@ -108,7 +108,7 @@
         </v-tabs>
         <search-bar
           v-if="watchTable === true"
-          class="justify-start"
+          class="search justify-start"
           v-on:open-search-bar="isSearch"
           v-on:close-search-bar="isNotSearch"
         />
@@ -179,8 +179,6 @@
             <v-icon
               @click="openDeletePosition(item.id, item.name)"
             >mdi-delete</v-icon>
-            <v-icon
-            >mdi-delete</v-icon>
           </template>
 
           <template v-slot:[`item.bns`]="{ item }">
@@ -194,11 +192,11 @@
             >mdi-arrow-up-bold</v-icon>
           </template>
         </v-data-table>
-        </v-app>
+
 
         <v-data-table
           v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
-          class="v-data-table elevation-1"
+          class="v-data-table"
           :headers="watchHeaders"
           :items="watchers"
           must-sort
@@ -221,6 +219,7 @@
           </template>
 
         </v-data-table>
+        </v-app>
       </v-card>
 
       <div
@@ -278,7 +277,7 @@ export default {
       {text: 'Beobachten', value: 'watch'},
     ],
     headers: [
-      {text: 'Buy/Sell', value: 'bns', align: 'end'},
+      {text: 'Buy/Sell', value: 'bns', align: 'center', },
       {text: 'Name', value: 'name', align: 'left'},
       // {text: 'Symbol', value: 'symbol', align: 'left'},
       {text: 'Anzahl', value: 'quantity', align: 'left'},
@@ -603,11 +602,15 @@ export default {
 .name {
   
 }
+.search {
+  color: red;
+  padding-top: 100px;
+}
 .currency {
   color: black;
 }
 #transactionTable {
-  max-height: 50px;
+  max-height: 0px;
 }
 #inspire {
   height: 40px;
