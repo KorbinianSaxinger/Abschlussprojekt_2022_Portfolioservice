@@ -4,9 +4,9 @@
     class="d-inline-flex"
    >
      <v-text-field
-         v-model="searchValue"
-         label="Suche"
-         @focus="getWatchers()"
+       v-model="searchValue"
+       label="Suche"
+       @focus="getWatchers()"
      >
      </v-text-field>
        <v-icon
