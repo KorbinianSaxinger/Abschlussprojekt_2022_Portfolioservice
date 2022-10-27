@@ -1,19 +1,19 @@
 <template>
   <v-container>
     <v-card
-        v-if="loading === false"
-        class="d-flex justify-end" width="1205"
-       >
+      v-if="loading === false"
+      class="mainCard d-flex justify-end"
+    >
       <v-tabs
-          class="tabs"
+        class="tabs"
       >
         <v-tab
           class="testCard"
           v-for="item in portfoliotabs"
           :key="item.id"
-            @click="getTableData(item.id)"
+          @click="getTableData(item.id)"
         >
-            {{ item.name }}
+          {{ item.name }}
         </v-tab>
       </v-tabs>
     </v-card>
@@ -24,9 +24,9 @@
     ></add-portfolio>
     <div>
       <delete-portfolio
-          v-if="deletePortfolio === true"
-          v-on:close-delete-portfolio="closeDeletePortfolio"
-          v-on:update-portfolios="fetchPortfolios"
+        v-if="deletePortfolio === true"
+        v-on:close-delete-portfolio="closeDeletePortfolio"
+        v-on:update-portfolios="updatePortfolios"
       />
 
       <create-position
@@ -45,47 +45,68 @@
       </delete-position>
 
       <v-card
-          class="tableCard"
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deletePortfolio !== true"
+        class="tableCard"
+        v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deletePortfolio !== true"
       >
-        <div class="iconWrapper">
-        <div class="menuIcons d-flex">
-          <v-icon
-              style="color: forestgreen"
-              @click.prevent="openAddPortfolio"
-
-          >
-            mdi-plus
-          </v-icon>
-          <v-icon
-              style="color: forestgreen"
-              @click.prevent="openDeletePortfolio(portfolioID)"
-          >
-            mdi-minus
-          </v-icon>
-        </div>
-        </div>
+        <v-app id="inspire">
+          <div class="iconWrapper">
+            <div class="menuIcons d-flex">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon
+                    style="color: forestgreen;"
+                    @click.prevent="openAddPortfolio"
+                    v-on="on"
+                    dark
+                  >
+                    mdi-plus
+                  </v-icon>
+                </template>
+                <span>Portfolio erstellen</span>
+              </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon
+                    style="color: forestgreen;"
+                    @click.prevent="openDeletePortfolio(portfolioID)"
+                    v-on="on"
+                    dark
+                  >
+                    mdi-minus
+                  </v-icon>
+                </template>
+                <span>Portfolio löschen</span>
+              </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon
+                    style="color: forestgreen;"
+                    @click.prevent="getPrice"
+                    v-on="on"
+                    dark
+                  >
+                    mdi-replay
+                  </v-icon>
+                </template>
+                <span>Preise neu laden</span>
+              </v-tooltip>
+            </div>
+          </div>
+        </v-app>
 
         <v-tabs
-            class="tabs"
+          class="tabs"
         >
           <v-tab
-              class="menueTabs"
-              v-for="item in menueTabs"
-              :key="item.value"
-              @click="changePositions(item.value)"
+            class="menueTabs"
+            v-for="item in menueTabs"
+            :key="item.value"
+            @click="changePositions(item.value)"
           >
             {{ item.text }}
           </v-tab>
         </v-tabs>
-        <v-btn
-          @click="getPrice"
-        >Preise laden</v-btn>
-        <search-bar
-          class="justify-start"
-          v-on:open-search-bar="isSearch"
-          v-on:close-search-bar="isNotSearch"
-        />
+        <v-app id="transactionTable">
         <v-data-table
           v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
           class="v-data-table"
@@ -95,107 +116,109 @@
           must-sort
           sort-asc
         >
-          <template v-slot:[`item.buyValue`]="{ item }">
-            {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }} <span class="currency"> {{ currency }}</span>
+          <template v-slot:[`item.name`]="{ item }">
+            <span class="name">{{ item.name }}</span>
           </template>
+            <template v-slot:[`item.buyValue`]="{ item }">
+              {{ formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','') }} <span class="currency"> {{ currency }}</span>
+            </template>
 
-          <template v-slot:[`item.value`]="{ item }">
-
-            <div
-                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency).replace('-','')"
+            <template v-slot:[`item.value`]="{ item }">
+              <div
+                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
                 class="normalValue"
-            >
-
+              >
                 {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','').replace('.',',') }} <span class="currency"> {{ currency }}</span>
-            </div>
-            <div
-              v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency).replace('-','')"
-              class="upValue"
-            >
-                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
-            </div>
-            <div
-                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency).replace('-','')"
-                class="downValue"
-            >
-              {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
-            </div>
-
-          </template>
-
-          <template v-slot:[`item.price`]="{ item }">
-            {{ formatNumber(item.price, item.currency, item.conversion)  }} <span class="currency"> {{ currency }}</span>
-          </template>
-
-          <template v-slot:[`item.currentPrice`]="{ item }">
-            <div v-if="currentPrice(item.symbol) > item.price"
-              class="upValue"
-            >
-              {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
-            </div>
-            <div v-if="currentPrice(item.symbol) < item.price"
-              class="downValue"
-            >
-              {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
-            </div>
-            <div v-if="currentPrice(item.symbol) == item.price"
-            >
-              {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
-            </div>
-          </template>
-
-          <template v-slot:[`item.action`]="{ item }">
-            <v-icon
-              @click="openDeletePosition(item.id, item.name)"
-            >mdi-delete</v-icon>
-          </template>
-
-          <template v-slot:[`item.bns`]="{ item }">
-            <v-icon
-                v-if="item.quantity < 0"
-                class="sellIcon"
-            >mdi-arrow-down-bold</v-icon>
-            <v-icon
-                v-if="item.quantity > 0"
-                class="buyIcon"
-            >mdi-arrow-up-bold</v-icon>
-          </template>
+              </div>
+                <div
+                  v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
+                  class="upValue"
+                >
+                  {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
+                </div>
+                  <div
+                    v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
+                    class="downValue"
+                  >
+                    {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
+                  </div>
+            </template>
+              <template v-slot:[`item.price`]="{ item }">
+                {{ formatNumber(item.price, item.currency, item.conversion)  }} <span class="currency"> {{ currency }}</span>
+              </template>
+              <template v-slot:[`item.currentPrice`]="{ item }">
+                <div v-if="(item.price * item.conversion).toFixed(3) < (currentPrice(item.symbol) * conversion).toFixed(3)"
+                  class="upValue"
+                >
+                  {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
+                </div>
+                  <div v-if="(item.price * item.conversion).toFixed(3) > (currentPrice(item.symbol) * conversion).toFixed(3)"
+                    class="downValue"
+                  >
+                    {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
+                  </div>
+                <div v-if="(item.price * item.conversion).toFixed(3) === (currentPrice(item.symbol) * conversion).toFixed(3)"
+                >
+                  {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
+                </div>
+              </template>
+                <template v-slot:[`item.action`]="{ item }">
+                  <v-icon
+                    @click="openDeletePosition(item.id, item.name)"
+                  >mdi-delete</v-icon>
+                </template>
+              <template v-slot:[`item.bns`]="{ item }">
+                <v-icon
+                  v-if="item.quantity < 0"
+                  class="sellIcon"
+                >mdi-arrow-down-bold</v-icon>
+                <v-icon
+                  v-if="item.quantity > 0"
+                  class="buyIcon"
+                >mdi-arrow-up-bold</v-icon>
+              </template>
         </v-data-table>
-
-        <v-data-table
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
-          class="v-data-table elevation-1"
-          :headers="watchHeaders"
-          :items="watchers"
-          must-sort
-          sort-asc
-          sort-by="name"
-          :items-per-page="10"
-          v-on:watchlist="getWatchers(localStorage.portfolioID)"
-
-        >
-          <template v-slot:[`item.action`]="{ item }">
-            <v-icon
-              @click.prevent="createPosition(item.symbol, item.name, item.currency, item.currentPrice)"
+          <v-card
+            class="watchTable"
+          >
+            <search-bar
+              v-if="watchTable === true"
+              class="search justify-start"
+              v-on:open-search-bar="isSearch"
+              v-on:close-search-bar="isNotSearch"
+            />
+            <v-data-table
+              v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
+              class="v-data-table"
+              :headers="watchHeaders"
+              :items="watchers"
+              must-sort
+              sort-asc
+              sort-by="name"
+              :items-per-page="10"
+              v-on:watchlist="getWatchers(localStorage.portfolioID)"
             >
-              mdi-cart-outline
-            </v-icon>
-          </template>
-
-          <template v-slot:[`item.currentPrice`]="{ item }">
-            {{ formatNumber(item.currentPrice, item.currency) }} <span class="currency"> {{ currency }}</span>
-          </template>
-
-        </v-data-table>
+              <template v-slot:[`item.action`]="{ item }">
+                <v-icon
+                  @click.prevent="createPosition(item.symbol, item.name, item.currency, item.currentPrice)"
+                >
+                  mdi-cart-outline
+                </v-icon>
+              </template>
+              <template v-slot:[`item.currentPrice`]="{ item }">
+                {{ formatNumber(item.currentPrice, item.currency) }} <span class="currency"> {{ currency }}</span>
+              </template>
+            </v-data-table>
+          </v-card>
+        </v-app>
       </v-card>
-
       <div
-          v-if="loading === true"
+        v-if="loading === true"
       >
         <v-progress-circular
-            class="loading"
-            :size="50"
-            indeterminate
+          class="loading"
+          :size="50"
+          indeterminate
         ></v-progress-circular>
       </div>
     </div>
@@ -234,7 +257,7 @@ export default {
     watchers: [],
     allWatchers: [],
     newWatchers: [],
-    conversion: 1.0141,
+    conversion: 1.0,
     conf: 0,
     currency: '€',
     user: '',
@@ -244,28 +267,34 @@ export default {
       {text: 'Beobachten', value: 'watch'},
     ],
     headers: [
-      {text: 'Buy/Sell', value: 'bns', align: 'end'},
-      {text: 'Name', value: 'name', align: 'left'},
+      {text: 'Buy/Sell', value: 'bns', align: 'center', },
+      {text: 'Name', value: 'name', align: 'left', width: '200px'},
       // {text: 'Symbol', value: 'symbol', align: 'left'},
       {text: 'Anzahl', value: 'quantity', align: 'left'},
       {text: 'Einkaufskurs', value: 'price', align: 'left'},
-      {text: 'Kurs', value: 'currentPrice', align: 'left'},
-      {text: 'EK / VK Wert', value: 'buyValue', align: 'left'},
-      {text: 'Wert', value: 'value', align: 'left'},
+      {text: 'Kurs', value: 'currentPrice', align: 'left', sortable: false},
+      {text: 'EK / VK Wert', value: 'buyValue', align: 'left', sortable: false},
+      {text: 'Wert', value: 'value', align: 'left', sortable: false},
       {text: 'Kaufdatum', value: 'created', align: 'left'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
 
     ],
     watchHeaders: [
       {text: 'Name', value: 'name', align: 'left'},
-      {text: 'Währung', value: 'currency', align: 'left'},
-      {text: 'Symbol', value: 'symbol', align: 'left'},
-      {text: 'Price', value: 'currentPrice', align: 'left'},
+      {text: 'Währung', value: 'currency', align: 'center'},
+      {text: 'Symbol', value: 'symbol', align: 'center'},
+      {text: 'Price', value: 'currentPrice', align: 'center'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
 
     ]
   }),
   methods: {
+    updatePortfolios() {
+      const id = this.portfoliotabs[this.portfoliotabs.length-2].id
+      this.fetchPortfolios()
+      this.getPositions(id)
+
+    },
     formatNumber(number, currency, conv) {
       let conversion = this.conversion
       if (number && conv) {
@@ -317,12 +346,14 @@ export default {
 
     },
     getConversion(from, to) {
+      const apiKey1 = 'a14022da84mshd39087a3bdc041ep1624c9jsn1ef31b2c1017'
+      // const apiKey2 = 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38'
       const options = {
         method: 'GET',
         url: 'https://currency-converter18.p.rapidapi.com/api/v1/convert',
         params: {from: from, to: to, amount: '1'},
         headers: {
-          'X-RapidAPI-Key': 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38',
+          'X-RapidAPI-Key': apiKey1,
           'X-RapidAPI-Host': 'currency-converter18.p.rapidapi.com'
         }
       };
@@ -332,7 +363,7 @@ export default {
       }).catch(function (error) {
         console.error(error);
       });
-      this.conf = 1
+      this.conf += 1
     },
     getPrice()
     {
@@ -447,6 +478,8 @@ export default {
     },
     closeDeletePortfolio() {
       this.deletePortfolio = false
+      this.watchTable = false
+      this.transactionTable = true
     },
     openAddPortfolio() {
       this.addPortfolio = true
@@ -519,6 +552,7 @@ export default {
   watch: {
     conf() {
       this.conversion = localStorage.conversionRate
+      console.log('conv ' + this.conversion)
     },
     addedWatcher() {
       setTimeout(() => {
@@ -543,9 +577,9 @@ export default {
       if (user) {
         this.user = user.uid;
         await this.fetchPortfolios();
-        await this.getPositions(localStorage.portfolioID);
-        await this.getWatchers(localStorage.portfolioID)
-        this.portfolioID = localStorage.portfolioID
+        this.portfolioID = this.portfoliotabs[0].id
+        await this.getPositions(this.portfolioID)
+        await this.getWatchers(this.portfolioID)
       }
     });
   },
@@ -553,14 +587,28 @@ export default {
 </script>
 
 <style scoped>
+/*@import '~vuetify/src/styles/styles.sass';*/
+
+.name {
+  
+}
+.watchTable {
+  margin-top: 20px;
+  border-radius: 10px;
+}
 .currency {
   color: black;
+}
+#transactionTable {
+  max-height: 0px;
+}
+#inspire {
+  height: 40px;
 }
 .iconWrapper {
   height: 40px;
 }
 .menuIcons {
-  padding-top: 8px;
   margin: 10px 10px 10px 5px;
 }
 .normalValue {
@@ -579,20 +627,23 @@ export default {
   color: forestgreen;
 }
 .tableCard {
-  margin-top: 10px;
+  margin-top: 0px;
+  border-radius: 0px;
 }
 
 .loading {
   margin-top: 80px;
   color: red;
 }
-
+.mainCard {
+  border-radius: 10px 10px 0px 0px;
+}
 .tabs {
   color: forestgreen;
 }
 .v-data-table {
   margin-top: 20px;
-  border-radius: 10px;
+  border-radius: 10px 10px 10px 10px;
 }
 .addPosition {
   margin: 10px 0% 0px 30%;
