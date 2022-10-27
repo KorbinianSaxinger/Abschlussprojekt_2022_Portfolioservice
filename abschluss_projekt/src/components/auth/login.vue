@@ -11,15 +11,15 @@
       >Login</v-card-title>
       <v-form>
         <v-text-field
-            label="E-Mail"
+            class="v-text-field"
             outlined
             type="email"
             id="iEmail"
-            placeholder=" Email"
+            placeholder=" E-Mail"
             v-model="email"
         />
         <v-text-field
-            label="Passwort"
+            class="v-text-field"
             outlined
             type="password"
             id="iPasswort"
@@ -27,17 +27,22 @@
             v-model="passwort"
         />
         <v-btn
+            class="v-btn login"
             type="submit"
             @click.prevent="login"
         >
           Login
         </v-btn>
         <v-btn
+            class="v-btn register"
             type="submit"
             @click.prevent="openRegister"
         >
-          Register
+          Registrieren
         </v-btn>
+        <div
+            v-if="errorMessage !== ''"
+            class="errorMessage row--dense"> {{ errorMessage }} </div>
       </v-form>
     </v-card>
   </div>
@@ -52,7 +57,7 @@ export default {
   name: "P-Login",
   data() {
     return {
-      msg: '',
+      errorMessage: '',
       user: '',
       email: '',
       passwort: ''
@@ -77,8 +82,13 @@ export default {
           })
           .catch((error) => {
             // Handle Errors here.
-            console.log(error)
-            console.log(error.code)
+            if (error.code === 'auth/user-not-found') {
+              this.errorMessage = 'E-Mail oder Passwort falsch'
+            }
+            if (error.code === 'auth/wrong-password') {
+              this.errorMessage = 'E-Mail oder Passwort falsch'
+            }
+
             // const errorCode = error.code;
           })
           .finally(() => {
@@ -87,6 +97,13 @@ export default {
             }
       });
     },
+  },
+  watch: {
+    errorMessage() {
+      setTimeout(() => {
+        this.errorMessage = ''
+      }, 5000)
+    }
   },
   mounted() {
     const auth = getAuth(app);
@@ -103,6 +120,21 @@ export default {
 </script>
 
 <style scoped>
+.login {
+  color: forestgreen;
+}
+.v-btn {
+  margin-left: 10px;
+}
+.errorMessage {
+  margin-top: 20px;
+  color: red;
+}
+.v-text-field {
+  color: forestgreen;
+  width: 80%;
+  margin-left: 10%;
+}
 .card {
   margin-top: 10px;
   border-radius: 15px;

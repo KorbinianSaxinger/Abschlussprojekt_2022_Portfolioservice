@@ -222,7 +222,7 @@ export default {
   margin-bottom: 1250px;
 }
 .textField {
-  color: green;
+  color: forestgreen;
   margin-left: 10%;
   width: 80%;
 }
@@ -230,7 +230,7 @@ export default {
   width: 400px;
 }
 .closeIcon {
-  color: green;
+  color: forestgreen;
   margin-left: 48%;
 }
 .cardTitle{
