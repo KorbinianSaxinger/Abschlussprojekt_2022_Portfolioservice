@@ -588,9 +588,9 @@ export default {
       if (user) {
         this.user = user.uid;
         await this.fetchPortfolios();
-        await this.getPositions(localStorage.portfolioID)
-        await this.getWatchers(localStorage.portfolioID)
-        this.portfolioID = localStorage.portfolioID
+        this.portfolioID = this.portfoliotabs[0].id
+        await this.getPositions(this.portfolioID)
+        await this.getWatchers(this.portfolioID)
       }
     });
   },
