@@ -112,6 +112,7 @@
           v-on:open-search-bar="isSearch"
           v-on:close-search-bar="isNotSearch"
         />
+        <v-app id="transactionTable">
         <v-data-table
           v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
           class="v-data-table"
@@ -121,27 +122,31 @@
           must-sort
           sort-asc
         >
+          <template v-slot:[`item.name`]="{ item }">
+            <span class="name">{{ item.name }}</span>
+
+          </template>
           <template v-slot:[`item.buyValue`]="{ item }">
-            {{ formatNumber(item.price * item.quantity, item.currency).replace('-','') }} <span class="currency"> {{ currency }}</span>
+            {{ formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','') }} <span class="currency"> {{ currency }}</span>
           </template>
 
           <template v-slot:[`item.value`]="{ item }">
 
             <div
-                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency).replace('-','')"
+                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
                 class="normalValue"
             >
 
                 {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','').replace('.',',') }} <span class="currency"> {{ currency }}</span>
             </div>
             <div
-              v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency).replace('-','')"
+              v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
               class="upValue"
             >
                 {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
             </div>
             <div
-                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency).replace('-','')"
+                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
                 class="downValue"
             >
               {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
@@ -154,17 +159,17 @@
           </template>
 
           <template v-slot:[`item.currentPrice`]="{ item }">
-            <div v-if="currentPrice(item.symbol) > item.price"
+            <div v-if="(item.price * item.conversion).toFixed(3) < (currentPrice(item.symbol) * conversion).toFixed(3)"
               class="upValue"
             >
               {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
             </div>
-            <div v-if="currentPrice(item.symbol) < item.price"
+            <div v-if="(item.price * item.conversion).toFixed(3) > (currentPrice(item.symbol) * conversion).toFixed(3)"
               class="downValue"
             >
               {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
             </div>
-            <div v-if="currentPrice(item.symbol) == item.price"
+            <div v-if="(item.price * item.conversion).toFixed(3) === (currentPrice(item.symbol) * conversion).toFixed(3)"
             >
               {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
             </div>
@@ -173,6 +178,8 @@
           <template v-slot:[`item.action`]="{ item }">
             <v-icon
               @click="openDeletePosition(item.id, item.name)"
+            >mdi-delete</v-icon>
+            <v-icon
             >mdi-delete</v-icon>
           </template>
 
@@ -187,6 +194,7 @@
             >mdi-arrow-up-bold</v-icon>
           </template>
         </v-data-table>
+        </v-app>
 
         <v-data-table
           v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
@@ -260,7 +268,7 @@ export default {
     watchers: [],
     allWatchers: [],
     newWatchers: [],
-    conversion: 1.0141,
+    conversion: 1.0,
     conf: 0,
     currency: '€',
     user: '',
@@ -343,12 +351,14 @@ export default {
 
     },
     getConversion(from, to) {
+      const apiKey1 = 'a14022da84mshd39087a3bdc041ep1624c9jsn1ef31b2c1017'
+      // const apiKey2 = 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38'
       const options = {
         method: 'GET',
         url: 'https://currency-converter18.p.rapidapi.com/api/v1/convert',
         params: {from: from, to: to, amount: '1'},
         headers: {
-          'X-RapidAPI-Key': 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38',
+          'X-RapidAPI-Key': apiKey1,
           'X-RapidAPI-Host': 'currency-converter18.p.rapidapi.com'
         }
       };
@@ -358,7 +368,7 @@ export default {
       }).catch(function (error) {
         console.error(error);
       });
-      this.conf = 1
+      this.conf += 1
     },
     getPrice()
     {
@@ -545,6 +555,7 @@ export default {
   watch: {
     conf() {
       this.conversion = localStorage.conversionRate
+      console.log('conv ' + this.conversion)
     },
     addedWatcher() {
       setTimeout(() => {
@@ -579,8 +590,16 @@ export default {
 </script>
 
 <style scoped>
+/*@import '~vuetify/src/styles/styles.sass';*/
+
+.name {
+  
+}
 .currency {
   color: black;
+}
+#transactionTable {
+  max-height: 50px;
 }
 #inspire {
   height: 40px;
