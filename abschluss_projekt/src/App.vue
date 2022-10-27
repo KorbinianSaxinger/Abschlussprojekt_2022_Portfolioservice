@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="home">
     <app-header class="header"/>
       <router-view/>
     <app-footer/>
@@ -13,6 +13,16 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+.home {
+  background: url("assets/backgroundMD.jpg") no-repeat fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  height: 2000px;
+  max-height: 1500px;
+  /*width: 1900px;*/
 }
 .header {
   background-color: transparent;

@@ -197,6 +197,7 @@ export default {
   color: green;
 }
 .text-field {
+  color: forestgreen;
   margin-left: 50px;
   width: 200px;
   justify-content: center;

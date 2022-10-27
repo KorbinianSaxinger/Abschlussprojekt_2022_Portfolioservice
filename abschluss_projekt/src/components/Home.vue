@@ -56,17 +56,17 @@ export default {
 }
 </script>
 <style scoped>
+.home {
+  background: url("../assets/backgroundMD.jpg") no-repeat fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  /*max-height: 1500px;*/
+  /*width: 1900px;*/
+}
 .leftSideBar {
   position: absolute;
-}
-.home {
-    background: url("../assets/backgroundMD.jpg") no-repeat fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-    height: 1080px;
-    /*width: 1900px;*/
 }
 h1 {
   color: deepskyblue;

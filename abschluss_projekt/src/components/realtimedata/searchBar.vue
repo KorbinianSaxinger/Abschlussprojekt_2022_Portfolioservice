@@ -88,7 +88,7 @@ export default {
         this.watchers = JSONObject.watch;
 
       } else {
-        // this.alert = 'Keine Beobachteten Positionen'
+        this.alert = 'Keine Beobachteten Positionen'
       }
     },
 
@@ -157,7 +157,7 @@ export default {
           const db = getFirestore(app);
           setDoc(doc(db, "watch", this.user), addwatch);
         } catch (e) {
-          console.error("Error adding document: ", e);
+          // console.error("Error adding document: ", e);
         }
 
         this.closeSearch()
@@ -194,7 +194,9 @@ export default {
         that.changeResult(JSONObject)
 
       }).catch(function (error) {
-        console.error(error);
+        if (error) {
+          // console.error(error);
+        }
       });
     }
   },
