@@ -4,7 +4,6 @@
         <v-footer
             class="footer"
             padless
-            fixed
         >
             <v-row
                 justify="center"

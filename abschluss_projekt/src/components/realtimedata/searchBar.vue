@@ -19,13 +19,6 @@
         class="searchIcon"
        >mdi-close</v-icon>
    </div>
-   <div
-       v-if="alert !== ''"
-       class="alert"
-   >
-     <br>
-     {{ alert }}
-   </div>
    <v-data-table
      v-if="searchResult.length > 0"
      :headers="headers"
@@ -54,7 +47,6 @@ export default {
     return {
       user: '',
       // positionName: '',
-      alert: '',
       searchValue: '',
       searchResult: [],
       newResult: [],
@@ -88,8 +80,6 @@ export default {
 
         this.watchers = JSONObject.watch;
 
-      } else {
-        this.alert = 'Keine Beobachteten Positionen'
       }
     },
 
@@ -114,6 +104,9 @@ export default {
     },
 
     async add(item) {
+      this.getWatchers(localStorage.portfolioID)
+
+      setTimeout(() => {
 
       let keys = Object.keys(item);
       let values = keys.map(function(key) {
@@ -127,12 +120,6 @@ export default {
         const currency = values[7]
         const symbol = values[0]
         const price = 0
-
-
-        if (name === '') {
-          this.closeSearch()
-          return this.alert = 'Kein Eintrag'
-        }
 
         const createdWatch = {
           name: name,
@@ -160,8 +147,9 @@ export default {
         } catch (e) {
           // console.error("Error adding document: ", e);
         }
+        }, 100)
 
-        this.closeSearch()
+      this.closeSearch()
 
     },
 
@@ -220,22 +208,11 @@ export default {
     });
     this.getWatchers()
   },
-  watch: {
-    alert() {
-      setTimeout(() => {
-        this.alert = ''
-      }, 3000)
-    },
-  },
 
 }
 </script>
 
 <style scoped>
-.alert {
-  /*margin-left: 50px;*/
-  color: red;
-}
 .searchIcon {
   margin-top: 25px;
   margin-left: 5px;
