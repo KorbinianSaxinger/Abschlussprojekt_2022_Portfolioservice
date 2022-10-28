@@ -117,7 +117,19 @@
           sort-asc
         >
           <template v-slot:[`item.name`]="{ item }">
-            <span class="name">{{ item.name }}</span>
+            <div v-if="item.name.length < 25">
+              {{ item.name }}
+            </div>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <span
+                    v-if="item.name.length > 25"
+                  v-bind="attrs"
+                  v-on="on"
+                > {{ item.name.substr(0,20) + '...'}}</span>
+              </template>
+              <span> {{ item.name }}</span>
+            </v-tooltip>
           </template>
             <template v-slot:[`item.buyValue`]="{ item }">
               {{ formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','') }} <span class="currency"> {{ currency }}</span>
