@@ -81,7 +81,7 @@ p {
 }
 .lbutton {
   color: forestgreen;
-  margin: 20px 10px 10px 0px;
+  margin: 35px 10px 10px 0px;
 }
 .logo {
   margin: 10px 10px 10px 10px;
