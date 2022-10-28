@@ -57,6 +57,7 @@ export default {
       alert: '',
       searchValue: '',
       searchResult: [],
+      newResult: [],
       positions: [],
       watchers: [],
       stockValues: {},
@@ -165,8 +166,19 @@ export default {
     },
 
     changeResult(object) {
+      this.searchResult = []
       for (let i = 0; i < object.bestMatches.length; i++) {
-        this.searchResult.push(object.bestMatches[i])
+        let item = object.bestMatches
+        let keys = Object.keys(item[i]);
+        let values = keys.map(function (key) {
+          return item[i][key];
+        });
+        if (values[0].match(/([A-Z0-9]{1}\.|[A-Z0-9]{2}\.|[A-Z0-9]{3}\.|[A-Z0-9]{4}\.|[A-Z0-9]{5}\.|[A-Z0-9]{6}\.)/i)) {
+          // invalid
+          // console.log('invalid ', values[0]) //stay for dev
+        } else {
+          this.searchResult.push(object.bestMatches[i])
+        }
       }
     },
 
@@ -190,7 +202,6 @@ export default {
       axios.request(options).then(function (response) {
         const JSONString = JSON.stringify(response.data);
         const JSONObject = JSON.parse(JSONString);
-
         that.changeResult(JSONObject)
 
       }).catch(function (error) {
