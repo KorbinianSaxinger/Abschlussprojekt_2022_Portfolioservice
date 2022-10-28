@@ -503,7 +503,7 @@ export default {
     },
     getTableData(id) {
       this.safePortfolioID(id)
-      this.getPrice()
+      // this.getPrice()
       this.getPositions(id)
       this.getWatchers(id)
     },

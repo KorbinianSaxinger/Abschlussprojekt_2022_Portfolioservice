@@ -20,9 +20,8 @@
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-  height: 2000px;
+  height: 1500px;
   max-height: 1500px;
-  /*width: 1900px;*/
 }
 .header {
   background-color: transparent;
