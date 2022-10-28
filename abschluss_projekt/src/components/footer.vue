@@ -1,6 +1,8 @@
 <template>
-    <div class="footer">
+<!--  <v-app id="inspire" style="height: 0px">-->
+    <div>
         <v-footer
+            class="footer"
             padless
             fixed
         >
@@ -31,6 +33,7 @@
             </v-row>
         </v-footer>
     </div>
+<!--  </v-app>-->
 </template>
 
 <script>
@@ -53,8 +56,13 @@ export default {
 </script>
 
 <style scoped>
+.footer {
+  background-color: rgba(148, 148, 148, 0.44);
+}
 .links {
-  margin-left: 42.4%;
-  justify-content: end;
+  margin-left: auto;
+  margin-right: auto;
+  justify-content: center;
+  color: forestgreen;
 }
 </style>

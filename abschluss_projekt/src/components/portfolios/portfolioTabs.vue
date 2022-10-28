@@ -108,7 +108,7 @@
         </v-tabs>
         <v-app id="transactionTable">
         <v-data-table
-          v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
+          v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
           class="v-data-table"
           :headers="headers"
           :items="positions"
@@ -188,7 +188,7 @@
               v-on:close-search-bar="isNotSearch"
             />
             <v-data-table
-              v-if="addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
+              v-if="watchers.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
               class="v-data-table"
               :headers="watchHeaders"
               :items="watchers"
@@ -290,9 +290,11 @@ export default {
   }),
   methods: {
     updatePortfolios() {
-      const id = this.portfoliotabs[this.portfoliotabs.length-2].id
       this.fetchPortfolios()
-      this.getPositions(id)
+      setTimeout(() => {
+        const id = this.portfoliotabs[this.portfoliotabs.length-1].id
+        this.getPositions(id)
+      }, 500)
 
     },
     formatNumber(number, currency, conv) {
@@ -379,9 +381,9 @@ export default {
         if (this.allWatchers[i].portfolioID === id) {
           let symbol = this.allWatchers[i].symbol
 
-          finnhubClient.quote(symbol, (error, data, response) => {
+          finnhubClient.quote(symbol, (error, data) => {
             if (error) {
-              console.log(response)
+              console.log(error)
             }
 
             let update = {
@@ -501,6 +503,7 @@ export default {
     },
     getTableData(id) {
       this.safePortfolioID(id)
+      // this.getPrice()
       this.getPositions(id)
       this.getWatchers(id)
     },
@@ -523,7 +526,7 @@ export default {
       this.safePortfolioID(id)
 
       const db = getFirestore(app);
-      const docRef = doc(db, "watch", this.user);
+      const docRef = doc(db, 'watch', this.user);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {

@@ -12,11 +12,11 @@
     </router-link>
           <p class="text-md-center">Portfolio Service Korbinian Saxinger</p>
           <div v-if="user !== ''">
-            <v-btn class="lbutton text-justify" @click.prevent="logout">Logout</v-btn>
+            <v-btn class="lbutton text-justify" dark @click.prevent="logout">Logout</v-btn>
           </div>
           <div v-if="user == ''">
             <router-link to="login">
-              <v-btn class="lbutton text-justify">login</v-btn>
+              <v-btn class="lbutton text-justify" dark>login</v-btn>
             </router-link>
 
           </div>
@@ -68,19 +68,20 @@ export default {
 .header {
     height: 110px;
     max-height: 110px;
-    background-color: transparent;
+    background-color: rgba(148, 148, 148, 0.44);
 }
 
 p {
   position: inherit;
-  margin-left: 37%;
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 50px;
   color: black;
+
 }
 .lbutton {
-  color: red;
-  position: absolute;
-  margin: 20px 10px 10px 30%;
+  color: forestgreen;
+  margin: 20px 10px 10px 0px;
 }
 .logo {
   margin: 10px 10px 10px 10px;
