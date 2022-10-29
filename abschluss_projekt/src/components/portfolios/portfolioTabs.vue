@@ -316,7 +316,7 @@ export default {
 
     ],
     watchHeaders: [
-      {text: 'Name', value: 'name', align: 'left'},
+      {text: 'Name', value: 'name', align: 'left', width: '350px'},
       {text: 'Währung', value: 'currency', align: 'center'},
       {text: 'Symbol', value: 'symbol', align: 'center'},
       {text: 'Preis', value: 'currentPrice', align: 'center'},
@@ -407,8 +407,8 @@ export default {
     {
       this.price = 0
       let id = localStorage.portfolioID
-      // const apiKey = 'cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00'  // K.S
-      const apiKey = 'cdeh2pqad3ifdqf13890cdeh2pqad3ifdqf1389g'     //ko
+      const apiKey = 'cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00'  // K.S
+      // const apiKey = 'cdeh2pqad3ifdqf13890cdeh2pqad3ifdqf1389g'     //ko
 
       this.getWatchers(id)
       this.getConversion('USD', 'EUR')
@@ -427,16 +427,45 @@ export default {
 
           finnhubClient.quote(symbol, (error, data) => {
             if (error) {
+
               let keys = Object.keys(error);
               let values = keys.map(function(key) {
                 return error[key];
               });
+
               console.log(values[1].statusCode, +' '+ values[1].text.replace('{"error":', '').replace('}', ''))
+
               if (values[1].statusCode === 403) {
-                this.alert = 'Einige Preise sind nicht supported'
+                this.alert = symbol + ' wird noch nicht supported!'
+              }
+              if (values[1].statusCode === 429) {
+                this.alert = 'Zu viele API calls'
+              }
+
+              let update = {
+                currency: this.allWatchers[i].currency,
+                currentPrice: this.allWatchers[i].currentPrice,
+                name: this.allWatchers[i].name,
+                portfolioID: this.allWatchers[i].portfolioID,
+                symbol: this.allWatchers[i].symbol,
+              }
+
+              this.newWatchers.push(update)
+
+              const newPrice = {
+                watch: this.newWatchers
+              }
+
+              try {
+                const db = getFirestore(app);
+                setDoc(doc(db, "watch", this.user), newPrice);
+              } catch (e) {
+                console.error("Error adding document: ", e);
               }
             } else {
-              this.price = data.c
+              if (data) {
+                this.price = data.c
+              }
               let update = {
                 currency: this.allWatchers[i].currency,
                 currentPrice: this.price,
