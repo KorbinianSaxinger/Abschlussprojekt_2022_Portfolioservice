@@ -43,10 +43,16 @@
         v-on:update-positions="updatePositions"
       >
       </delete-position>
+      <delete-watchers
+        class="deleteWatchers"
+        v-if="deleteWatchers === true"
+        v-on:close-delete-watchers="closeDeleteWatchers"
+      >
+      </delete-watchers>
 
       <v-card
         class="tableCard"
-        v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deletePortfolio !== true"
+        v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deleteWatchers !== true && deletePortfolio !== true"
       >
         <v-app id="inspire">
           <div class="iconWrapper">
@@ -108,7 +114,7 @@
         </v-tabs>
         <v-app id="transactionTable">
         <v-data-table
-          v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
+          v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && this.deleteWatchers != true && positions.length > 0"
           class="v-data-table"
           :headers="headers"
           :items="positions"
@@ -203,7 +209,7 @@
               {{ alert }}
             </v-alert>
             <v-data-table
-              v-if="watchers.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
+              v-if="watchers.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.deleteWatchers != true && this.watchers.length > 0"
               class="v-data-table"
               :headers="watchHeaders"
               :items="watchers"
@@ -221,9 +227,14 @@
                   mdi-cart-outline
                 </v-icon>
                 <v-icon
-                  v-if="item.currentPrice <= 0"
-                  >
+                    v-if="item.currentPrice <= 0"
+                >
                   mdi-cart-off
+                </v-icon>
+                <v-icon
+                  @click.prevent="openDeleteWatcher(item.symbol, item.name)"
+                >
+                  mdi-delete
                 </v-icon>
               </template>
               <template v-slot:[`item.currentPrice`]="{ item }">
@@ -257,17 +268,19 @@ import AddPortfolio from "@/components/portfolios/addPortfolio";
 import axios from "axios";
 import SearchBar from "@/components/realtimedata/searchBar";
 import DeletePortfolio from "@/components/portfolios/deletePortfolio";
+import DeleteWatchers from "@/components/watchers/deleteWatchers";
 // import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
-  components: {DeletePortfolio, SearchBar, AddPortfolio, CreatePosition, deletePosition},
+  components: {DeleteWatchers, DeletePortfolio, SearchBar, AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
     search: false,
     addPortfolio: false,
     addPosition: false,
     deletePosition: false,
+    deleteWatchers: false,
     deletePortfolio: false,
     transactionTable: false,
     watchTable: false,
@@ -507,6 +520,14 @@ export default {
       localStorage.positionName = name
       localStorage.positions = this.positions
     },
+    openDeleteWatcher(symbol, name) {
+      this.watchTable = false
+      // this.transactionTable = false
+      this.deleteWatchers  = true
+      localStorage.watcherSymbol = symbol
+      localStorage.watcherName = name
+      localStorage.watchers = this.watchers
+    },
     openDeletePortfolio(id) {
       this.safePortfolioID(id)
       this.deletePortfolio = true
@@ -516,6 +537,9 @@ export default {
     },
     closeDeletePosition() {
       this.deletePosition = false
+    },
+    closeDeleteWatchers() {
+      this.deleteWatchers = false
     },
     closeDeletePortfolio() {
       this.deletePortfolio = false
