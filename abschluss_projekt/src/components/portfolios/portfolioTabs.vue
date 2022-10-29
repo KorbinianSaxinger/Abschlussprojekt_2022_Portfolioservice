@@ -107,89 +107,96 @@
           </v-tab>
         </v-tabs>
         <v-app id="transactionTable">
-        <v-data-table
-          v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
-          class="v-data-table"
-          :headers="headers"
-          :items="positions"
-          sort-by="name"
-          must-sort
-          sort-asc
-        >
-          <template v-slot:[`item.name`]="{ item }">
-            <div v-if="item.name.length < 25">
-              {{ item.name }}
-            </div>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <span
-                    v-if="item.name.length > 25"
-                  v-bind="attrs"
-                  v-on="on"
-                > {{ item.name.substr(0,20) + '...'}}</span>
-              </template>
-              <span> {{ item.name }}</span>
-            </v-tooltip>
-          </template>
-            <template v-slot:[`item.buyValue`]="{ item }">
-              {{ formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','') }} <span class="currency"> {{ currency }}</span>
-            </template>
 
-            <template v-slot:[`item.value`]="{ item }">
-              <div
-                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
-                class="normalValue"
-              >
-                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','').replace('.',',') }} <span class="currency"> {{ currency }}</span>
-              </div>
-                <div
-                  v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
-                  class="upValue"
-                >
-                  {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
-                </div>
-                  <div
-                    v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"
-                    class="downValue"
-                  >
-                    {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>
-                  </div>
-            </template>
-              <template v-slot:[`item.price`]="{ item }">
-                {{ formatNumber(item.price, item.currency, item.conversion)  }} <span class="currency"> {{ currency }}</span>
-              </template>
-              <template v-slot:[`item.currentPrice`]="{ item }">
-                <div v-if="(item.price * item.conversion).toFixed(3) < (currentPrice(item.symbol) * conversion).toFixed(3)"
-                  class="upValue"
-                >
-                  {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
-                </div>
-                  <div v-if="(item.price * item.conversion).toFixed(3) > (currentPrice(item.symbol) * conversion).toFixed(3)"
-                    class="downValue"
-                  >
-                    {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
-                  </div>
-                <div v-if="(item.price * item.conversion).toFixed(3) === (currentPrice(item.symbol) * conversion).toFixed(3)"
-                >
-                  {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>
-                </div>
-              </template>
-                <template v-slot:[`item.action`]="{ item }">
-                  <v-icon
-                    @click="openDeletePosition(item.id, item.name)"
-                  >mdi-delete</v-icon>
-                </template>
-              <template v-slot:[`item.bns`]="{ item }">
-                <v-icon
-                  v-if="item.quantity < 0"
-                  class="sellIcon"
-                >mdi-arrow-down-bold</v-icon>
-                <v-icon
-                  v-if="item.quantity > 0"
-                  class="buyIcon"
-                >mdi-arrow-up-bold</v-icon>
-              </template>
-        </v-data-table>
+          <transaction-table
+             v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
+          />
+
+<!--          -->
+<!--        <v-data-table-->
+<!--          v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"-->
+<!--          class="v-data-table"-->
+<!--          :headers="headers"-->
+<!--          :items="positions"-->
+<!--          sort-by="name"-->
+<!--          must-sort-->
+<!--          sort-asc-->
+<!--        >-->
+<!--          <template v-slot:[`item.name`]="{ item }">-->
+<!--            <div v-if="item.name.length < 25">-->
+<!--              {{ item.name }}-->
+<!--            </div>-->
+<!--            <v-tooltip bottom>-->
+<!--              <template v-slot:activator="{ on, attrs }">-->
+<!--                <span-->
+<!--                    v-if="item.name.length > 25"-->
+<!--                  v-bind="attrs"-->
+<!--                  v-on="on"-->
+<!--                > {{ item.name.substr(0,20) + '...'}}</span>-->
+<!--              </template>-->
+<!--              <span> {{ item.name }}</span>-->
+<!--            </v-tooltip>-->
+<!--          </template>-->
+<!--            <template v-slot:[`item.buyValue`]="{ item }">-->
+<!--              {{ formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','') }} <span class="currency"> {{ currency }}</span>-->
+<!--            </template>-->
+
+<!--            <template v-slot:[`item.value`]="{ item }">-->
+<!--              <div-->
+<!--                v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') === formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"-->
+<!--                class="normalValue"-->
+<!--              >-->
+<!--                {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','').replace('.',',') }} <span class="currency"> {{ currency }}</span>-->
+<!--              </div>-->
+<!--                <div-->
+<!--                  v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') > formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"-->
+<!--                  class="upValue"-->
+<!--                >-->
+<!--                  {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>-->
+<!--                </div>-->
+<!--                  <div-->
+<!--                    v-if="currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') < formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','')"-->
+<!--                    class="downValue"-->
+<!--                  >-->
+<!--                    {{ currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','') }} <span class="currency"> {{ currency }}</span>-->
+<!--                  </div>-->
+<!--            </template>-->
+<!--              <template v-slot:[`item.price`]="{ item }">-->
+<!--                {{ formatNumber(item.price, item.currency, item.conversion)  }} <span class="currency"> {{ currency }}</span>-->
+<!--              </template>-->
+<!--              <template v-slot:[`item.currentPrice`]="{ item }">-->
+<!--                <div v-if="(item.price * item.conversion).toFixed(3) < (currentPrice(item.symbol) * conversion).toFixed(3)"-->
+<!--                  class="upValue"-->
+<!--                >-->
+<!--                  {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>-->
+<!--                </div>-->
+<!--                  <div v-if="(item.price * item.conversion).toFixed(3) > (currentPrice(item.symbol) * conversion).toFixed(3)"-->
+<!--                    class="downValue"-->
+<!--                  >-->
+<!--                    {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>-->
+<!--                  </div>-->
+<!--                <div v-if="(item.price * item.conversion).toFixed(3) === (currentPrice(item.symbol) * conversion).toFixed(3)"-->
+<!--                >-->
+<!--                  {{ currentPrice(item.symbol, item.price, item.currency) }} <span class="currency"> {{ currency }}</span>-->
+<!--                </div>-->
+<!--              </template>-->
+<!--                <template v-slot:[`item.action`]="{ item }">-->
+<!--                  <v-icon-->
+<!--                    @click="openDeletePosition(item.id, item.name)"-->
+<!--                  >mdi-delete</v-icon>-->
+<!--                </template>-->
+<!--              <template v-slot:[`item.bns`]="{ item }">-->
+<!--                <v-icon-->
+<!--                  v-if="item.quantity < 0"-->
+<!--                  class="sellIcon"-->
+<!--                >mdi-arrow-down-bold</v-icon>-->
+<!--                <v-icon-->
+<!--                  v-if="item.quantity > 0"-->
+<!--                  class="buyIcon"-->
+<!--                >mdi-arrow-up-bold</v-icon>-->
+<!--              </template>-->
+<!--        </v-data-table>-->
+
           <v-card
             class="watchTable"
           >
@@ -257,11 +264,12 @@ import AddPortfolio from "@/components/portfolios/addPortfolio";
 import axios from "axios";
 import SearchBar from "@/components/realtimedata/searchBar";
 import DeletePortfolio from "@/components/portfolios/deletePortfolio";
+import TransactionTable from "@/components/positions/transactionTable";
 // import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
-  components: {DeletePortfolio, SearchBar, AddPortfolio, CreatePosition, deletePosition},
+  components: {TransactionTable, DeletePortfolio, SearchBar, AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
     search: false,
@@ -270,9 +278,10 @@ export default {
     deletePosition: false,
     deletePortfolio: false,
     transactionTable: false,
-    watchTable: false,
+    watchTable: true,
     addedWatcher: false,
     portfolioID: null,
+    currentTab: 'transactions',
     positions: [],
     watchers: [],
     allWatchers: [],
@@ -286,22 +295,22 @@ export default {
     user: '',
     portfoliotabs: [],
     menueTabs: [
-      {text: 'Transaktionen', value: 'transactions'},
       {text: 'Beobachten', value: 'watch'},
+      {text: 'Transaktionen', value: 'transactions'},
     ],
-    headers: [
-      {text: 'Buy/Sell', value: 'bns', align: 'center', },
-      {text: 'Name', value: 'name', align: 'left', width: '200px'},
-      // {text: 'Symbol', value: 'symbol', align: 'left'},
-      {text: 'Anzahl', value: 'quantity', align: 'center'},
-      {text: 'EK / VK Kurs', value: 'price', align: 'left'},
-      {text: 'Kurs', value: 'currentPrice', align: 'left', sortable: false},
-      {text: 'EK / VK Wert', value: 'buyValue', align: 'left', sortable: false},
-      {text: 'Wert', value: 'value', align: 'left', sortable: false},
-      {text: 'Kaufdatum', value: 'created', align: 'left'},
-      {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
-
-    ],
+    // headers: [
+    //   {text: 'Buy/Sell', value: 'bns', align: 'center', },
+    //   {text: 'Name', value: 'name', align: 'left', width: '200px'},
+    //   // {text: 'Symbol', value: 'symbol', align: 'left'},
+    //   {text: 'Anzahl', value: 'quantity', align: 'center'},
+    //   {text: 'EK / VK Kurs', value: 'price', align: 'left'},
+    //   {text: 'Kurs', value: 'currentPrice', align: 'left', sortable: false},
+    //   {text: 'EK / VK Wert', value: 'buyValue', align: 'left', sortable: false},
+    //   {text: 'Wert', value: 'value', align: 'left', sortable: false},
+    //   {text: 'Kaufdatum', value: 'created', align: 'left'},
+    //   {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
+    //
+    // ],
     watchHeaders: [
       {text: 'Name', value: 'name', align: 'left'},
       {text: 'Währung', value: 'currency', align: 'center'},
@@ -345,6 +354,7 @@ export default {
         this.getWatchers(localStorage.portfolioID)
         // this.getPrice()
       }
+      localStorage.currentTab = position
     },
     createPosition(symbol, name, currency, currentPrice) {
       localStorage.symbol = symbol
@@ -541,6 +551,7 @@ export default {
       this.getPositions(portfolioID)
     },
     getTableData(id) {
+      this.$emit('get-new-data')
       this.safePortfolioID(id)
       // this.getPrice()
       this.getPositions(id)
@@ -628,6 +639,7 @@ export default {
         this.user = user.uid;
         await this.fetchPortfolios();
         this.portfolioID = this.portfoliotabs[0].id
+        this.safePortfolioID(this.portfolioID)
         await this.getPositions(this.portfolioID)
         await this.getWatchers(this.portfolioID)
       }
@@ -664,21 +676,7 @@ export default {
 .menuIcons {
   margin: 10px 10px 10px 5px;
 }
-.normalValue {
-  color: black;
-}
-.upValue {
-  color: forestgreen;
-}
-.downValue {
-  color: red
-}
-.sellIcon {
-  color: red;
-}
-.buyIcon {
-  color: forestgreen;
-}
+
 .tableCard {
   margin-top: 0px;
   border-radius: 0px;
