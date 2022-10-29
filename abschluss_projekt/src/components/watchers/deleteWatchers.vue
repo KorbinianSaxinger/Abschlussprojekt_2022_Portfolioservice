@@ -7,12 +7,12 @@
       class="card d-block"
       rounded
       width="350px"
-      height="100%"
+      height="110%"
     >
       <v-card-title
         class="d-inline-flex"
       >
-        Position löschen
+        Watcher löschen
       </v-card-title>
       <v-icon
         class="icon"
@@ -21,12 +21,13 @@
         mdi-close
       </v-icon>
       <div>
-        Position:  <span style="color: green">{{ positionName }}</span>  <br><br>
-      Wirklich löschen?</div>
+        Watcher:  <span style="color: green">{{ watcherName }}</span> <br> <br>
+        <span class="warning"> {{ alert }} </span>
+      </div>
       <v-btn
         class="justify-start"
         type="submit"
-        @click.prevent="deletePosition(portfolioID)"
+        @click.prevent="deleteWatcher()"
       > Löschen </v-btn>
     </v-card>
   </v-container>
@@ -38,43 +39,42 @@ import app from "../../../firebase";
 import {doc, getDoc, getFirestore, setDoc} from "firebase/firestore";
 
 export default {
-  name: "deletePosition",
+  name: "deleteWatchers",
   data() {
     return {
-      positionID: null,
-      positionName: null,
+      watcherSymbol: null,
+      watcherName: null,
       portfolioID: null,
       user: null,
-      positions: [],
-      newPositions: []
-
+      watchers: [],
+      newWatchers: [],
+      alert: 'Achtung!, alle beobachteten Positionen mit dem selben Symbol werden gelöscht!'
     }
   },
   methods: {
     closeCard: function () {
-      this.$emit('close-delete-positions')
-      this.$emit('update-positions')
+      this.$emit('close-delete-watchers')
     },
 
-    async deletePosition() {
+    async deleteWatcher() {
       const db = getFirestore(app);
-      const docRef = doc(db, "positions", this.user);
+      const docRef = doc(db, "watch", this.user);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
-        this.positions = JSONObject.positions;
+        this.watchers = JSONObject.watch;
       }
-      const newPositions = this.positions.filter(position => position.id != this.positionID)
+      const newWatchers = this.watchers.filter(watch => watch.symbol !== this.watcherSymbol)
 
-      const positions = {
-        positions: newPositions
+      const watchers = {
+        watch: newWatchers
       }
 
       try {
         const db = getFirestore(app);
-        await setDoc(doc(db, "positions", this.user), positions);
+        await setDoc(doc(db, "watch", this.user), watchers);
       } catch (e) {
         console.error("Error adding document: ", e);
       }
@@ -82,10 +82,10 @@ export default {
     },
   },
   mounted() {
-    this.positionID = localStorage.positionID
+    this.watcherSymbol = localStorage.watcherSymbol
     this.portfolioID = localStorage.portfolioID
-    this.positionName = localStorage.positionName
-    this.positions = localStorage.positions
+    this.watcherName = localStorage.watcherName
+    this.watchers = localStorage.watchers
 
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
@@ -98,6 +98,10 @@ export default {
 </script>
 
 <style scoped>
+.warning {
+  color: red;
+  /*padding: 0px 15px 0px 10px;*/
+}
 .card {
   border-radius: 10px;
   padding-bottom: 10px;
