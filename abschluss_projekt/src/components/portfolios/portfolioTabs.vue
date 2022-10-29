@@ -199,6 +199,9 @@
               v-on:open-search-bar="isSearch"
               v-on:close-search-bar="isNotSearch"
             />
+            <v-alert class="alert v-alert" v-if="this.alert !== '' && this.watchTable === true">
+              {{ alert }}
+            </v-alert>
             <v-data-table
               v-if="watchers.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
               class="v-data-table"
@@ -212,9 +215,15 @@
             >
               <template v-slot:[`item.action`]="{ item }">
                 <v-icon
+                  v-if="item.currentPrice > 0"
                   @click.prevent="createPosition(item.symbol, item.name, item.currency, item.currentPrice)"
                 >
                   mdi-cart-outline
+                </v-icon>
+                <v-icon
+                  v-if="item.currentPrice <= 0"
+                  >
+                  mdi-cart-off
                 </v-icon>
               </template>
               <template v-slot:[`item.currentPrice`]="{ item }">
@@ -264,14 +273,16 @@ export default {
     watchTable: false,
     addedWatcher: false,
     portfolioID: null,
-    portfolioName: '',
     positions: [],
     watchers: [],
     allWatchers: [],
     newWatchers: [],
+    portfolioName: '',
+    alert: '',
     conversion: 1.0,
     conf: 0,
     currency: '€',
+    price: 0,
     user: '',
     portfoliotabs: [],
     menueTabs: [
@@ -295,7 +306,7 @@ export default {
       {text: 'Name', value: 'name', align: 'left'},
       {text: 'Währung', value: 'currency', align: 'center'},
       {text: 'Symbol', value: 'symbol', align: 'center'},
-      {text: 'Price', value: 'currentPrice', align: 'center'},
+      {text: 'Preis', value: 'currentPrice', align: 'center'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
 
     ]
@@ -381,9 +392,15 @@ export default {
     },
     getPrice()
     {
-      this.getConversion('USD', 'EUR')
-      this.newWatchers = []
+      this.price = 0
       let id = localStorage.portfolioID
+
+      this.getWatchers(id)
+      this.getConversion('USD', 'EUR')
+
+      setTimeout(() => {
+
+      this.newWatchers = []
       const finnhub = require('finnhub');
       const api_key = finnhub.ApiClient.instance.authentications['api_key'];
       api_key.apiKey = "cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00"
@@ -395,28 +412,36 @@ export default {
 
           finnhubClient.quote(symbol, (error, data) => {
             if (error) {
-              console.log(error)
-            }
+              let keys = Object.keys(error);
+              let values = keys.map(function(key) {
+                return error[key];
+              });
+              console.log(values[1].statusCode, +' '+ values[1].text.replace('{"error":', '').replace('}', ''))
+              if (values[1].statusCode === 403) {
+                this.alert = 'Einige Preise sind nicht supported'
+              }
+            } else {
+              this.price = data.c
+              let update = {
+                currency: this.allWatchers[i].currency,
+                currentPrice: this.price,
+                name: this.allWatchers[i].name,
+                portfolioID: this.allWatchers[i].portfolioID,
+                symbol: this.allWatchers[i].symbol,
+              }
 
-            let update = {
-              currency: this.allWatchers[i].currency,
-              currentPrice: data.c,
-              name: this.allWatchers[i].name,
-              portfolioID: this.allWatchers[i].portfolioID,
-              symbol: this.allWatchers[i].symbol,
-            }
+              this.newWatchers.push(update)
 
-            this.newWatchers.push(update)
+              const newPrice = {
+                watch: this.newWatchers
+              }
 
-            const newPrice = {
-              watch: this.newWatchers
-            }
-
-            try {
-              const db = getFirestore(app);
-              setDoc(doc(db, "watch", this.user), newPrice);
-            } catch (e) {
-              console.error("Error add ing document: ", e);
+              try {
+                const db = getFirestore(app);
+                setDoc(doc(db, "watch", this.user), newPrice);
+              } catch (e) {
+                console.error("Error add ing document: ", e);
+              }
             }
           });
         } else {
@@ -444,7 +469,9 @@ export default {
       }
       setTimeout(() => {
         this.getWatchers(localStorage.portfolioID)
-      }, 500)
+      }, 700)
+
+      }, 800)
     },
 
 
@@ -547,6 +574,9 @@ export default {
         this.allWatchers = JSONObject.watch
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
       }
+      if (this.watchers.length === 0) {
+        this.alert = 'Keine Beobachteten Positionen!'
+      }
     },
 
     async fetchPortfolios() {
@@ -565,6 +595,11 @@ export default {
     },
   },
   watch: {
+    alert() {
+      setTimeout(() => {
+        this.alert = ''
+      }, 3000)
+    },
     conf() {
       this.conversion = localStorage.conversionRate
       console.log('conv ' + this.conversion)
@@ -606,6 +641,9 @@ export default {
 
 .name {
   
+}
+.alert {
+  color: red;
 }
 .watchTable {
   margin-top: 20px;
