@@ -407,6 +407,8 @@ export default {
     {
       this.price = 0
       let id = localStorage.portfolioID
+      // const apiKey = 'cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00'  // K.S
+      const apiKey = 'cdeh2pqad3ifdqf13890cdeh2pqad3ifdqf1389g'     //ko
 
       this.getWatchers(id)
       this.getConversion('USD', 'EUR')
@@ -416,7 +418,7 @@ export default {
       this.newWatchers = []
       const finnhub = require('finnhub');
       const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-      api_key.apiKey = "cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00"
+      api_key.apiKey = apiKey
       const finnhubClient = new finnhub.DefaultApi()
 
       for (let i = 0; i < this.allWatchers.length; i++) {
@@ -484,7 +486,7 @@ export default {
         this.getWatchers(localStorage.portfolioID)
       }, 700)
 
-      }, 800)
+      }, 700)
     },
 
 
