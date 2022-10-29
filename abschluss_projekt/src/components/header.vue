@@ -1,26 +1,29 @@
 <template>
-  <div
+  <v-app>
+    <div
       class="header d-flex"
-  >
-    <router-link to="/Home">
-      <v-img
+    >
+      <router-link to="/Home">
+        <v-img
           class="logo align-left"
           max-height="100"
           max-width="100"
           src="../assets/logo.png"
-      ></v-img>
-    </router-link>
-          <p class="text-md-center">Portfolio Service Korbinian Saxinger</p>
+        ></v-img>
+      </router-link>
+        <p class="text-md-center">Portfolio Service Korbinian Saxinger
+        </p>
           <div v-if="user !== ''">
-            <v-btn class="lbutton text-justify" dark @click.prevent="logout">Logout</v-btn>
+            <v-btn class="lbutton text-justify" dark @click.prevent="logout">Logout
+            </v-btn>
           </div>
           <div v-if="user == ''">
             <router-link to="login">
               <v-btn class="lbutton text-justify" dark>login</v-btn>
             </router-link>
-
           </div>
-  </div>
+    </div>
+  </v-app>
 </template>
 
 <script>
@@ -66,9 +69,9 @@ export default {
 <style scoped>
 
 .header {
-    height: 110px;
-    max-height: 110px;
-    background-color: rgba(148, 148, 148, 0.44);
+  height: 110px;
+  max-height: 110px;
+  background-color: rgba(148, 148, 148, 0.44);
 }
 
 p {
@@ -81,7 +84,7 @@ p {
 }
 .lbutton {
   color: forestgreen;
-  margin: 20px 10px 10px 0px;
+  margin: 35px 10px 10px 0px;
 }
 .logo {
   margin: 10px 10px 10px 10px;

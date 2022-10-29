@@ -19,7 +19,7 @@
                     rounded
                     class="my-2"
                 >
-                  <router-link :to="link">
+                  <router-link :to="link" style="color: black">
                     {{ link }}
                   </router-link>
                 </v-btn>
@@ -57,6 +57,7 @@ export default {
 
 <style scoped>
 .footer {
+  height: 100px;
   background-color: rgba(148, 148, 148, 0.44);
 }
 .links {

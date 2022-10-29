@@ -19,13 +19,6 @@
         class="searchIcon"
        >mdi-close</v-icon>
    </div>
-   <div
-       v-if="alert !== ''"
-       class="alert"
-   >
-     <br>
-     {{ alert }}
-   </div>
    <v-data-table
      v-if="searchResult.length > 0"
      :headers="headers"
@@ -54,9 +47,9 @@ export default {
     return {
       user: '',
       // positionName: '',
-      alert: '',
       searchValue: '',
       searchResult: [],
+      newResult: [],
       positions: [],
       watchers: [],
       stockValues: {},
@@ -87,8 +80,6 @@ export default {
 
         this.watchers = JSONObject.watch;
 
-      } else {
-        this.alert = 'Keine Beobachteten Positionen'
       }
     },
 
@@ -113,6 +104,9 @@ export default {
     },
 
     async add(item) {
+      this.getWatchers(localStorage.portfolioID)
+
+      setTimeout(() => {
 
       let keys = Object.keys(item);
       let values = keys.map(function(key) {
@@ -126,12 +120,6 @@ export default {
         const currency = values[7]
         const symbol = values[0]
         const price = 0
-
-
-        if (name === '') {
-          this.closeSearch()
-          return this.alert = 'Kein Eintrag'
-        }
 
         const createdWatch = {
           name: name,
@@ -159,14 +147,26 @@ export default {
         } catch (e) {
           // console.error("Error adding document: ", e);
         }
+        }, 100)
 
-        this.closeSearch()
+      this.closeSearch()
 
     },
 
     changeResult(object) {
+      this.searchResult = []
       for (let i = 0; i < object.bestMatches.length; i++) {
-        this.searchResult.push(object.bestMatches[i])
+        let item = object.bestMatches
+        let keys = Object.keys(item[i]);
+        let values = keys.map(function (key) {
+          return item[i][key];
+        });
+        if (values[0].match(/([A-Z0-9]{1}\.|[A-Z0-9]{2}\.|[A-Z0-9]{3}\.|[A-Z0-9]{4}\.|[A-Z0-9]{5}\.|[A-Z0-9]{6}\.)/i)) {
+          // invalid
+          // console.log('invalid ', values[0]) //stay for dev
+        } else {
+          this.searchResult.push(object.bestMatches[i])
+        }
       }
     },
 
@@ -190,7 +190,6 @@ export default {
       axios.request(options).then(function (response) {
         const JSONString = JSON.stringify(response.data);
         const JSONObject = JSON.parse(JSONString);
-
         that.changeResult(JSONObject)
 
       }).catch(function (error) {
@@ -209,22 +208,11 @@ export default {
     });
     this.getWatchers()
   },
-  watch: {
-    alert() {
-      setTimeout(() => {
-        this.alert = ''
-      }, 3000)
-    },
-  },
 
 }
 </script>
 
 <style scoped>
-.alert {
-  /*margin-left: 50px;*/
-  color: red;
-}
 .searchIcon {
   margin-top: 25px;
   margin-left: 5px;

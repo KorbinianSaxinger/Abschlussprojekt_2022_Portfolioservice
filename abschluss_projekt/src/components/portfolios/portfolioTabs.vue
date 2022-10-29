@@ -43,10 +43,16 @@
         v-on:update-positions="updatePositions"
       >
       </delete-position>
+      <delete-watchers
+        class="deleteWatchers"
+        v-if="deleteWatchers === true"
+        v-on:close-delete-watchers="closeDeleteWatchers"
+      >
+      </delete-watchers>
 
       <v-card
         class="tableCard"
-        v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deletePortfolio !== true"
+        v-if="addPosition !== true && addPortfolio !== true && deletePosition != true && deleteWatchers !== true && deletePortfolio !== true"
       >
         <v-app id="inspire">
           <div class="iconWrapper">
@@ -108,7 +114,7 @@
         </v-tabs>
         <v-app id="transactionTable">
         <v-data-table
-          v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && positions.length > 0"
+          v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && this.deleteWatchers != true && positions.length > 0"
           class="v-data-table"
           :headers="headers"
           :items="positions"
@@ -117,7 +123,19 @@
           sort-asc
         >
           <template v-slot:[`item.name`]="{ item }">
-            <span class="name">{{ item.name }}</span>
+            <div v-if="item.name.length < 25">
+              {{ item.name }}
+            </div>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <span
+                    v-if="item.name.length > 25"
+                  v-bind="attrs"
+                  v-on="on"
+                > {{ item.name.substr(0,20) + '...'}}</span>
+              </template>
+              <span> {{ item.name }}</span>
+            </v-tooltip>
           </template>
             <template v-slot:[`item.buyValue`]="{ item }">
               {{ formatNumber(item.price * item.quantity, item.currency, item.conversion).replace('-','') }} <span class="currency"> {{ currency }}</span>
@@ -187,8 +205,11 @@
               v-on:open-search-bar="isSearch"
               v-on:close-search-bar="isNotSearch"
             />
+            <v-alert class="alert v-alert" v-if="this.alert !== '' && this.watchTable === true">
+              {{ alert }}
+            </v-alert>
             <v-data-table
-              v-if="watchers.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.watchers.length > 0"
+              v-if="watchers.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.deleteWatchers != true && this.watchers.length > 0"
               class="v-data-table"
               :headers="watchHeaders"
               :items="watchers"
@@ -200,9 +221,20 @@
             >
               <template v-slot:[`item.action`]="{ item }">
                 <v-icon
+                  v-if="item.currentPrice > 0"
                   @click.prevent="createPosition(item.symbol, item.name, item.currency, item.currentPrice)"
                 >
                   mdi-cart-outline
+                </v-icon>
+                <v-icon
+                    v-if="item.currentPrice <= 0"
+                >
+                  mdi-cart-off
+                </v-icon>
+                <v-icon
+                  @click.prevent="openDeleteWatcher(item.symbol, item.name)"
+                >
+                  mdi-delete
                 </v-icon>
               </template>
               <template v-slot:[`item.currentPrice`]="{ item }">
@@ -236,30 +268,34 @@ import AddPortfolio from "@/components/portfolios/addPortfolio";
 import axios from "axios";
 import SearchBar from "@/components/realtimedata/searchBar";
 import DeletePortfolio from "@/components/portfolios/deletePortfolio";
+import DeleteWatchers from "@/components/watchers/deleteWatchers";
 // import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
-  components: {DeletePortfolio, SearchBar, AddPortfolio, CreatePosition, deletePosition},
+  components: {DeleteWatchers, DeletePortfolio, SearchBar, AddPortfolio, CreatePosition, deletePosition},
   data: () => ({
     loading: true,
     search: false,
     addPortfolio: false,
     addPosition: false,
     deletePosition: false,
+    deleteWatchers: false,
     deletePortfolio: false,
     transactionTable: false,
     watchTable: false,
     addedWatcher: false,
     portfolioID: null,
-    portfolioName: '',
     positions: [],
     watchers: [],
     allWatchers: [],
     newWatchers: [],
+    portfolioName: '',
+    alert: '',
     conversion: 1.0,
     conf: 0,
     currency: '€',
+    price: 0,
     user: '',
     portfoliotabs: [],
     menueTabs: [
@@ -270,8 +306,8 @@ export default {
       {text: 'Buy/Sell', value: 'bns', align: 'center', },
       {text: 'Name', value: 'name', align: 'left', width: '200px'},
       // {text: 'Symbol', value: 'symbol', align: 'left'},
-      {text: 'Anzahl', value: 'quantity', align: 'left'},
-      {text: 'Einkaufskurs', value: 'price', align: 'left'},
+      {text: 'Anzahl', value: 'quantity', align: 'center'},
+      {text: 'EK / VK Kurs', value: 'price', align: 'left'},
       {text: 'Kurs', value: 'currentPrice', align: 'left', sortable: false},
       {text: 'EK / VK Wert', value: 'buyValue', align: 'left', sortable: false},
       {text: 'Wert', value: 'value', align: 'left', sortable: false},
@@ -280,10 +316,10 @@ export default {
 
     ],
     watchHeaders: [
-      {text: 'Name', value: 'name', align: 'left'},
+      {text: 'Name', value: 'name', align: 'left', width: '350px'},
       {text: 'Währung', value: 'currency', align: 'center'},
       {text: 'Symbol', value: 'symbol', align: 'center'},
-      {text: 'Price', value: 'currentPrice', align: 'center'},
+      {text: 'Preis', value: 'currentPrice', align: 'center'},
       {text: 'Aktion', value: 'action', sortable: false, align: 'center'},
 
     ]
@@ -369,12 +405,20 @@ export default {
     },
     getPrice()
     {
-      this.getConversion('USD', 'EUR')
-      this.newWatchers = []
+      this.price = 0
       let id = localStorage.portfolioID
+      const apiKey = 'cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00'  // K.S
+      // const apiKey = 'cdeh2pqad3ifdqf13890cdeh2pqad3ifdqf1389g'     //ko
+
+      this.getWatchers(id)
+      this.getConversion('USD', 'EUR')
+
+      setTimeout(() => {
+
+      this.newWatchers = []
       const finnhub = require('finnhub');
       const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-      api_key.apiKey = "cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00"
+      api_key.apiKey = apiKey
       const finnhubClient = new finnhub.DefaultApi()
 
       for (let i = 0; i < this.allWatchers.length; i++) {
@@ -383,28 +427,65 @@ export default {
 
           finnhubClient.quote(symbol, (error, data) => {
             if (error) {
-              console.log(error)
-            }
 
-            let update = {
-              currency: this.allWatchers[i].currency,
-              currentPrice: data.c,
-              name: this.allWatchers[i].name,
-              portfolioID: this.allWatchers[i].portfolioID,
-              symbol: this.allWatchers[i].symbol,
-            }
+              let keys = Object.keys(error);
+              let values = keys.map(function(key) {
+                return error[key];
+              });
 
-            this.newWatchers.push(update)
+              console.log(values[1].statusCode, +' '+ values[1].text.replace('{"error":', '').replace('}', ''))
 
-            const newPrice = {
-              watch: this.newWatchers
-            }
+              if (values[1].statusCode === 403) {
+                this.alert = symbol + ' wird noch nicht supported!'
+              }
+              if (values[1].statusCode === 429) {
+                this.alert = 'Zu viele API calls'
+              }
 
-            try {
-              const db = getFirestore(app);
-              setDoc(doc(db, "watch", this.user), newPrice);
-            } catch (e) {
-              console.error("Error add ing document: ", e);
+              let update = {
+                currency: this.allWatchers[i].currency,
+                currentPrice: this.allWatchers[i].currentPrice,
+                name: this.allWatchers[i].name,
+                portfolioID: this.allWatchers[i].portfolioID,
+                symbol: this.allWatchers[i].symbol,
+              }
+
+              this.newWatchers.push(update)
+
+              const newPrice = {
+                watch: this.newWatchers
+              }
+
+              try {
+                const db = getFirestore(app);
+                setDoc(doc(db, "watch", this.user), newPrice);
+              } catch (e) {
+                console.error("Error adding document: ", e);
+              }
+            } else {
+              if (data) {
+                this.price = data.c
+              }
+              let update = {
+                currency: this.allWatchers[i].currency,
+                currentPrice: this.price,
+                name: this.allWatchers[i].name,
+                portfolioID: this.allWatchers[i].portfolioID,
+                symbol: this.allWatchers[i].symbol,
+              }
+
+              this.newWatchers.push(update)
+
+              const newPrice = {
+                watch: this.newWatchers
+              }
+
+              try {
+                const db = getFirestore(app);
+                setDoc(doc(db, "watch", this.user), newPrice);
+              } catch (e) {
+                console.error("Error add ing document: ", e);
+              }
             }
           });
         } else {
@@ -432,7 +513,9 @@ export default {
       }
       setTimeout(() => {
         this.getWatchers(localStorage.portfolioID)
-      }, 500)
+      }, 700)
+
+      }, 700)
     },
 
 
@@ -468,6 +551,14 @@ export default {
       localStorage.positionName = name
       localStorage.positions = this.positions
     },
+    openDeleteWatcher(symbol, name) {
+      this.watchTable = false
+      // this.transactionTable = false
+      this.deleteWatchers  = true
+      localStorage.watcherSymbol = symbol
+      localStorage.watcherName = name
+      localStorage.watchers = this.watchers
+    },
     openDeletePortfolio(id) {
       this.safePortfolioID(id)
       this.deletePortfolio = true
@@ -477,6 +568,9 @@ export default {
     },
     closeDeletePosition() {
       this.deletePosition = false
+    },
+    closeDeleteWatchers() {
+      this.deleteWatchers = false
     },
     closeDeletePortfolio() {
       this.deletePortfolio = false
@@ -535,6 +629,9 @@ export default {
         this.allWatchers = JSONObject.watch
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
       }
+      if (this.watchers.length === 0) {
+        this.alert = 'Keine Beobachteten Positionen!'
+      }
     },
 
     async fetchPortfolios() {
@@ -553,6 +650,11 @@ export default {
     },
   },
   watch: {
+    alert() {
+      setTimeout(() => {
+        this.alert = ''
+      }, 3000)
+    },
     conf() {
       this.conversion = localStorage.conversionRate
       console.log('conv ' + this.conversion)
@@ -594,6 +696,9 @@ export default {
 
 .name {
   
+}
+.alert {
+  color: red;
 }
 .watchTable {
   margin-top: 20px;
