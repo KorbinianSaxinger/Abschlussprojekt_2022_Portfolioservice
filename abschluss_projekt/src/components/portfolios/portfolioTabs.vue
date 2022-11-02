@@ -113,6 +113,9 @@
           </v-tab>
         </v-tabs>
         <v-app id="transactionTable">
+          <v-alert class="alert v-alert" v-if="this.alert !== '' && this.transactionTable === true || this.alert !== '' && this.watchTable === true">
+            {{ alert }}
+          </v-alert>
         <v-data-table
           v-if="positions.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.watchTable !== true && this.deleteWatchers != true && positions.length > 0"
           class="v-data-table"
@@ -205,9 +208,6 @@
               v-on:open-search-bar="isSearch"
               v-on:close-search-bar="isNotSearch"
             />
-            <v-alert class="alert v-alert" v-if="this.alert !== '' && this.watchTable === true">
-              {{ alert }}
-            </v-alert>
             <v-data-table
               v-if="watchers.length != 0 && addPosition !== true && addPortfolio !== true && deletePosition !== true && search !== true && this.transactionTable !== true && this.watchTable === true && this.deleteWatchers != true && this.watchers.length > 0"
               class="v-data-table"
@@ -406,7 +406,7 @@ export default {
     getPrice()
     {
       this.price = 0
-      let id = localStorage.portfolioID
+      let id = parseFloat(localStorage.portfolioID)
       const apiKey = 'cdc2m32ad3i6ap45idvgcdc2m32ad3i6ap45ie00'  // K.S
       // const apiKey = 'cdeh2pqad3ifdqf13890cdeh2pqad3ifdqf1389g'     //ko
 
@@ -446,7 +446,7 @@ export default {
                 currency: this.allWatchers[i].currency,
                 currentPrice: this.allWatchers[i].currentPrice,
                 name: this.allWatchers[i].name,
-                portfolioID: this.allWatchers[i].portfolioID,
+                portfolioID: parseFloat(this.allWatchers[i].portfolioID),
                 symbol: this.allWatchers[i].symbol,
               }
 
@@ -470,7 +470,7 @@ export default {
                 currency: this.allWatchers[i].currency,
                 currentPrice: this.price,
                 name: this.allWatchers[i].name,
-                portfolioID: this.allWatchers[i].portfolioID,
+                portfolioID: parseFloat(this.allWatchers[i].portfolioID),
                 symbol: this.allWatchers[i].symbol,
               }
 
@@ -493,7 +493,7 @@ export default {
             currency: this.allWatchers[i].currency,
             currentPrice: this.allWatchers[i].currentPrice,
             name: this.allWatchers[i].name,
-            portfolioID: this.allWatchers[i].portfolioID,
+            portfolioID: parseFloat(this.allWatchers[i].portfolioID),
             symbol: this.allWatchers[i].symbol,
           }
 
@@ -596,10 +596,18 @@ export default {
       this.getPositions(portfolioID)
     },
     getTableData(id) {
+
       this.safePortfolioID(id)
       // this.getPrice()
-      this.getPositions(id)
-      this.getWatchers(id)
+      if (this.transactionTable === true) {
+        this.getPositions(id)
+      }
+      if (this.watchTable === true) {
+        this.getWatchers(id)
+      }
+      // if (this.watchers.length === 0 || this.positions.length === 0) {
+      //   this.alert = 'Keine Einträge!'
+      // }
     },
     async getPositions(id) {
 
@@ -613,6 +621,9 @@ export default {
         const JSONString = JSON.stringify(docSnap.data());
         const JSONObject = JSON.parse(JSONString);
         this.positions = JSONObject.positions.filter(position => position.portfolioId == id);
+      }
+      if (this.positions.length === 0) {
+        this.alert = 'Keine Einträge!'
       }
     },
 
@@ -630,7 +641,7 @@ export default {
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
       }
       if (this.watchers.length === 0) {
-        this.alert = 'Keine Beobachteten Positionen!'
+        this.alert = 'Keine Einträge!'
       }
     },
 
@@ -676,6 +687,7 @@ export default {
   },
 
   mounted() {
+    this.transactionTable = true
     this.getConversion('USD', 'EUR')
     const auth = getAuth(app);
     onAuthStateChanged(auth, async (user) => {
