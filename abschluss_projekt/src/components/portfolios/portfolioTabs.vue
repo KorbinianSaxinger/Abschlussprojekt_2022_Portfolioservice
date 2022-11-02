@@ -598,16 +598,8 @@ export default {
     getTableData(id) {
 
       this.safePortfolioID(id)
-      // this.getPrice()
-      if (this.transactionTable === true) {
         this.getPositions(id)
-      }
-      if (this.watchTable === true) {
         this.getWatchers(id)
-      }
-      // if (this.watchers.length === 0 || this.positions.length === 0) {
-      //   this.alert = 'Keine Einträge!'
-      // }
     },
     async getPositions(id) {
 
@@ -622,7 +614,7 @@ export default {
         const JSONObject = JSON.parse(JSONString);
         this.positions = JSONObject.positions.filter(position => position.portfolioId == id);
       }
-      if (this.positions.length === 0) {
+      if (this.positions.length === 0 && this.transactionTable === true) {
         this.alert = 'Keine Einträge!'
       }
     },
@@ -640,7 +632,7 @@ export default {
         this.allWatchers = JSONObject.watch
         this.watchers = JSONObject.watch.filter(watch => watch.portfolioID == id);
       }
-      if (this.watchers.length === 0) {
+      if (this.watchers.length === 0 && this.watchTable === true) {
         this.alert = 'Keine Einträge!'
       }
     },
@@ -711,6 +703,8 @@ export default {
 }
 .alert {
   color: red;
+  margin-top: 20px;
+  border-radius: 10px;
 }
 .watchTable {
   margin-top: 20px;
