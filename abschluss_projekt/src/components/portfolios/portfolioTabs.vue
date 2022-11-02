@@ -260,16 +260,15 @@
 <script>
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {doc, getDoc, setDoc} from "firebase/firestore";
-import app from "../../../firebase";
 import { getFirestore } from "firebase/firestore";
+import app from "../../../firebase";
+import axios from "axios";
 import CreatePosition from "@/components/positions/createPosition";
 import deletePosition from "@/components/positions/deletePosition";
 import AddPortfolio from "@/components/portfolios/addPortfolio";
-import axios from "axios";
 import SearchBar from "@/components/realtimedata/searchBar";
 import DeletePortfolio from "@/components/portfolios/deletePortfolio";
 import DeleteWatchers from "@/components/watchers/deleteWatchers";
-// import finnhub from "finnhub";
 
 export default {
   name: "portfolioTabs",
@@ -333,6 +332,7 @@ export default {
       }, 500)
 
     },
+
     formatNumber(number, currency, conv) {
       let conversion = this.conversion
       if (number && conv) {
@@ -346,6 +346,7 @@ export default {
         return parseFloat(number)
       }
     },
+
     changePositions(position) {
       if (position === 'transactions') {
         this.transactionTable = true
@@ -359,6 +360,7 @@ export default {
         // this.getPrice()
       }
     },
+
     createPosition(symbol, name, currency, currentPrice) {
       localStorage.symbol = symbol
       localStorage.transactionName = name
@@ -366,6 +368,7 @@ export default {
       localStorage.currentPrice = currentPrice
       this.addPosition = true
     },
+
     currentPrice(symbol, wert, currency, quantity) {
       let price = this.watchers.filter(watch => watch.symbol === symbol)
       if (!quantity && price.length > 0) {
@@ -381,8 +384,8 @@ export default {
       } else {
         return this.formatNumber(wert, currency)
       }
-
     },
+
     getConversion(from, to) {
       const apiKey1 = 'a14022da84mshd39087a3bdc041ep1624c9jsn1ef31b2c1017'
       // const apiKey2 = 'b0dd61db1bmsh8ae2c8259016a03p143951jsn942adff6fa38'
@@ -518,13 +521,12 @@ export default {
       }, 700)
     },
 
-
     isSearch() {
       this.search = true
     },
+
     isNotSearch() {
       this.search = false
-
       setTimeout(() => {
         this.getWatchers(localStorage.portfolioID)
       }, 500)
@@ -534,23 +536,22 @@ export default {
       } else {
         this.addedWatcher = false
       }
+    },
 
-    },
-    openAddPosition() {
-      this.addPosition = true
-    },
     closeAddPosition() {
       this.getPositions(localStorage.portfolioID)
       this.transactionTable = true
       this.watchTable = false
       this.addPosition = false
     },
+
     openDeletePosition(id, name) {
       this.deletePosition = true
       localStorage.positionID = id
       localStorage.positionName = name
       localStorage.positions = this.positions
     },
+
     openDeleteWatcher(symbol, name) {
       this.watchTable = false
       // this.transactionTable = false
@@ -559,6 +560,7 @@ export default {
       localStorage.watcherName = name
       localStorage.watchers = this.watchers
     },
+
     openDeletePortfolio(id) {
       this.safePortfolioID(id)
       this.deletePortfolio = true
@@ -566,17 +568,21 @@ export default {
       console.log(portfolio[0].name)
       localStorage.portfolioName = portfolio[0].name
     },
+
     closeDeletePosition() {
       this.deletePosition = false
     },
+
     closeDeleteWatchers() {
       this.deleteWatchers = false
     },
+
     closeDeletePortfolio() {
       this.deletePortfolio = false
       this.watchTable = false
       this.transactionTable = true
     },
+
     openAddPortfolio() {
       this.addPortfolio = true
     },
@@ -595,12 +601,14 @@ export default {
       const portfolioID = localStorage.portfolioID
       this.getPositions(portfolioID)
     },
+
     getTableData(id) {
 
       this.safePortfolioID(id)
         this.getPositions(id)
         this.getWatchers(id)
     },
+
     async getPositions(id) {
 
       this.safePortfolioID(id)
@@ -658,15 +666,18 @@ export default {
         this.alert = ''
       }, 3000)
     },
+
     conf() {
       this.conversion = localStorage.conversionRate
       console.log('conv ' + this.conversion)
     },
+
     addedWatcher() {
       setTimeout(() => {
         this.getPrice()
       }, 1000)
     },
+
     portfoliotabs() {
       this.loading = false
     },
