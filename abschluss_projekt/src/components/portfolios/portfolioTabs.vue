@@ -430,7 +430,6 @@ export default {
 
           finnhubClient.quote(symbol, (error, data) => {
             if (error) {
-
               let keys = Object.keys(error);
               let values = keys.map(function(key) {
                 return error[key];
@@ -554,7 +553,6 @@ export default {
 
     openDeleteWatcher(symbol, name) {
       this.watchTable = false
-      // this.transactionTable = false
       this.deleteWatchers  = true
       localStorage.watcherSymbol = symbol
       localStorage.watcherName = name
