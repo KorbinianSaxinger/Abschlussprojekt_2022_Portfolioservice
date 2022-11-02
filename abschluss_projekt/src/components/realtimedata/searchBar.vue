@@ -116,7 +116,7 @@ export default {
         let newPositions = this.watchers;
 
         const name = values[1]
-        const portfolioID = localStorage.portfolioID
+        const portfolioID = parseFloat(localStorage.portfolioID)
         const currency = values[7]
         const symbol = values[0]
         const price = 0
