@@ -112,6 +112,7 @@
             {{ item.text }}
           </v-tab>
         </v-tabs>
+        <div class="summe">{{ "Gesamtwert " + sumValue().toString().replace('.',',') + " €" }}</div>
         <v-app id="transactionTable">
           <v-alert class="alert v-alert" v-if="this.alert !== '' && this.transactionTable === true || this.alert !== '' && this.watchTable === true">
             {{ alert }}
@@ -324,6 +325,17 @@ export default {
     ]
   }),
   methods: {
+    sumValue() {
+      let i
+      let summe = 0.0
+      for (i = 0; i < this.positions.length; i++) {
+        let item = this.positions[i]
+        let number = this.currentPrice(item.symbol, item.price, item.currency, item.quantity).replace('-','').replace(',','.')
+        console.log(number)
+        summe += parseFloat(number)
+      }
+      return summe
+    },
     updatePortfolios() {
       this.fetchPortfolios()
       setTimeout(() => {
@@ -774,5 +786,8 @@ export default {
   height: 200px;
   border-color: black;
   border-radius: 10px
+}
+.summe {
+  color: forestgreen;
 }
 </style>
