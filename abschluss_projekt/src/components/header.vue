@@ -11,7 +11,7 @@
           src="../assets/logo.png"
         ></v-img>
       </router-link>
-        <p class="text-md-center">Portfolio Service Korbinian Saxinger
+        <p class="headline text-md-center">Portfolio Service Korbinian Saxinger
         </p>
           <div v-if="user !== ''">
             <v-btn class="lbutton text-justify" dark @click.prevent="logout">Logout
@@ -88,5 +88,8 @@ p {
 }
 .logo {
   margin: 10px 10px 10px 10px;
+}
+.headline {
+  margin-left: 34%;
 }
 </style>
