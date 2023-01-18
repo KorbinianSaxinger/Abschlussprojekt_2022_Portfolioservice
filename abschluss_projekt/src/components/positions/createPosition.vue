@@ -8,9 +8,9 @@
       rounded
     >
       <v-card-title
-        class="cardTitle flex-row"
+        class="cardTitle d-flex-row"
       >
-        Position erstellen
+        Transaktion erstellen
         <v-icon
           class="closeIcon justify-end"
           @click.prevent="closeCard"
@@ -67,7 +67,7 @@
       <v-btn
         @click="createPosition"
         class="okBtn"
-      ><span style="color: green">OK</span>
+      ><span style="color: green">Erstellen</span>
       </v-btn>
     </v-card>
   </v-container>
@@ -231,7 +231,7 @@ export default {
 }
 .closeIcon {
   color: forestgreen;
-  margin-left: 48%;
+  margin-left: 40%;
 }
 .cardTitle{
   justify-self: center;

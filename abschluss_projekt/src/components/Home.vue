@@ -10,6 +10,22 @@
       >
         <portfolio-tabs/>
       </div>
+        <div v-if="user === ''"
+          class="d-inline-flex"
+        >
+          <v-card class="welcome">
+            <v-card-title>Herzlich Wilkommen</v-card-title>
+            <v-card-text class="cardText"> Bitte melden sie sich an,  <br> um unsere Software nutzen zu können!</v-card-text>
+            <v-btn
+              @click="Router().push('/Login')"
+              class="loginBTN"
+            >Anmelden</v-btn>
+            <v-btn
+                @click="Router().push('/register')"
+                class="registerBTN"
+            >Registrieren</v-btn>
+          </v-card>
+        </div>
     </div>
   </v-main>
 </template>
@@ -19,6 +35,7 @@ import {getAuth, onAuthStateChanged} from "firebase/auth";
 import app from "../../firebase";
 import PortfolioTabs from "@/components/portfolios/portfolioTabs";
 import LeftSidebar from "@/components/leftSidebar";
+import Router from "@/router";
 
 export default {
   name: "PHome",
@@ -31,6 +48,9 @@ export default {
     }
   },
   methods: {
+    Router() {
+      return Router
+    }
     // fetchData() {
     //   axios.get('http://localhost/get.php').then(response  => (
     //       this.todo_list = response.data)
@@ -67,6 +87,13 @@ export default {
 }
 .leftSideBar {
   position: absolute;
+}
+.loginBTN {
+  color: forestgreen;
+}
+.welcome {
+  margin-top: 20px;
+  height: 100%;
 }
 h1 {
   color: deepskyblue;

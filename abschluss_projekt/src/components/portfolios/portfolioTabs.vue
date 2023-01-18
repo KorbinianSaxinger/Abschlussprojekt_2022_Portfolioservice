@@ -112,7 +112,7 @@
             {{ item.text }}
           </v-tab>
         </v-tabs>
-        <div class="summe">{{ "Gesamtwert " + sumValue().toString().replace('.',',') + " €" }}</div>
+        <div class="summe">{{ "Gesamtwert " + sumValue().toFixed(3).toString().replace('.',',') + " €" }}</div>
         <v-app id="transactionTable">
           <v-alert class="alert v-alert" v-if="this.alert !== '' && this.transactionTable === true || this.alert !== '' && this.watchTable === true">
             {{ alert }}
